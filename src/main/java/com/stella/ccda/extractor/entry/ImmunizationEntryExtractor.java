@@ -10,6 +10,7 @@ import com.stella.utils.Utils;
 
 public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 	
+	private String immunGroupId;
 	private String m2hid;
 	private String name;
 	private String datesPreviouslyGiven;
@@ -19,10 +20,18 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 	private String lastEnquiryDate;
 	private String timeStamp;
 	
-	public String extractData(final Node entry) throws XPathExpressionException {		
+	@Override
+	public void setGroupId(final String groupId) {
+		this.immunGroupId =  groupId;
+	}
+	
+	@Override
+	public String extractData(final Node entry) throws XPathExpressionException {	
 		
-		String sql = "INSERT INTO records.Immunization(m2hid, name, datespreviouslygiven, nextdue, description, reporturl, lastenquirydate, timestamp) "
-					+ "VALUES (%s, %s, %s, %s, %s, %s, %s, %s);";
+		final String nameRef = getNamRefFromNode(entry);
+		
+		String sqlImmunization = "INSERT INTO records.Immunization(m2hid, name, datespreviouslygiven, nextdue, description, reporturl, lastenquirydate, timestamp, immunGroupId) "
+					+ "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');";
 		
 		System.out.println("----------------------------");
 		
@@ -33,39 +42,45 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 		if (entry.getNodeType() == Node.ELEMENT_NODE) {
 			
 			m2hid = Utils.getM2hid();
-			name = getNameFromNode(entry);
-			datesPreviouslyGiven = getDatesPreviouslyGiven(entry);
-			nextDue = getNextDue(entry);
+			
+			name = getNameFromNode(entry, nameRef);
+			datesPreviouslyGiven = getDatesPreviouslyGiven(entry, nameRef);
+			nextDue = getNextDue(entry, nameRef);
 			description = getDescription(entry);
 			reportUrl = getReportUrl(entry);
 			lastEnquiryDate = getLastEnquiryDate(entry);
 			timeStamp = getTimeStampFromNode(entry);			
 			
-			sql = String.format(sql, m2hid, name, datesPreviouslyGiven, nextDue, description, reportUrl, lastEnquiryDate, timeStamp);	
+			sqlImmunization = String.format(sqlImmunization, m2hid, name, datesPreviouslyGiven, nextDue, description, reportUrl, lastEnquiryDate, timeStamp, immunGroupId);	
 			
 			System.out.println("----------------------------");
 			
-			System.out.println("SQL Generated : " + sql);
+			System.out.println("SQL Generated : " + sqlImmunization);
 
 		}
-		return sql;
+		return sqlImmunization;
 	}
 	
-	private String getNameFromNode(final Node entry) throws XPathExpressionException {
+	private String getNamRefFromNode(final Node entry) throws XPathExpressionException {
 		
-		//XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/consumable/manufacturedProduct/manufacturedMaterial/code/@displayName");
-		//return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
-		return "";
+		XPathExpression nameRefXpathExp = Utils.getXPathExpression("substanceAdministration/text/reference/@value");
+		String nameRef =  nameRefXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
+		return nameRef = nameRef.replace("#", "");
 	}
 	
-	private String getDatesPreviouslyGiven(final Node entry) throws XPathExpressionException {
+	private String getNameFromNode(final Node entry, final String nameRef) throws XPathExpressionException {
 		
-		//XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/effectiveTime/@value");
-		//return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
-		return "";
+		XPathExpression nameXpathExp = Utils.getXPathExpression("../../text/table/tbody/tr[ID='" + nameRef + "']\td[0]\text()");
+		return nameXpathExp.evaluate(entry,  XPathConstants.STRING).toString();		
+	}
+	
+	private String getDatesPreviouslyGiven(final Node entry, final String nameRef) throws XPathExpressionException {
+		
+		XPathExpression timeStampXpathExp = Utils.getXPathExpression("../../text/table/tbody/tr[ID='" + nameRef + "']\td[1]\text()");
+		return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
 	}
 		
-	private String getNextDue(final Node entry) throws XPathExpressionException {
+	private String getNextDue(final Node entry, final String nameRef) throws XPathExpressionException {
 			
 		//XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/effectiveTime/@value");
 		//return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();

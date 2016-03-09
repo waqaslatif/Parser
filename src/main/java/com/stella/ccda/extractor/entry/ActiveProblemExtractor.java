@@ -1,55 +1,71 @@
 package com.stella.ccda.extractor.entry;
 
-import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
+import com.stella.utils.Utils;
+
+/**
+ * @author ali
+ *
+ */
 public class ActiveProblemExtractor implements CcdaEntryExtractor {
 	
-	private static final String ACTIVE_PROBLEM_ID = "2.16.840.1.113883.10.20.22.4.3";
+	private static final String M2HID = "200";
+	private static final String PROBLEM_ID_OBSERVATION = "2.16.840.1.113883.10.20.22.4.4";
 	
-	public String extractData(final Node entry) {
-		
-		System.out.println("\nCurrent Element :" + entry.getNodeName());
-		
+	
+	public String extractData(final Node entry) throws XPathExpressionException {
 		if (entry.getNodeType() == Node.ELEMENT_NODE) {
-
-			Element eElement = (Element) entry;
-
-			System.out.println("Staff id : " + eElement.getAttribute("classCode"));
-			System.out.println("First Name : " + eElement.getAttribute("EVN"));
-
+			String problemName = extractName(entry);
+			String notedDate = extractNotedDate(entry);
+			String timestamp = extractTimestamp(entry);
+			
+			if (notedDate.trim().equals("")) {
+				notedDate = Utils.getCurrentDate();
+			}
+			
+			if (timestamp.trim().equals("")) {
+				timestamp = Utils.getCurrentDate();
+			}
+			
+			return buildQuery(problemName, notedDate, timestamp);
 		}
 		return null;
 	}
 	
-	public String getSql(final Node entry) {
+	public String buildQuery(String problemName, String notedDate, String timestamp) {
+		final String query = "INSERT INTO records.\"ActiveProblem\"(id, m2hid, name, noteddate, timestamp)"
+				+ " VALUES (" + M2HID + ", '" + problemName + "', '"
+				+ notedDate + "','" + timestamp + "');";
+		return query;
+	}
+	
+	private String extractName(final Node entry) throws XPathExpressionException{
+		final XPathExpression timeStampXpathExp = Utils.getXPathExpression("entryRelationship/observation["
+				+ "templateId/@root='" + PROBLEM_ID_OBSERVATION + "']/value/@displayName");
+		return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
+	}
+	
+	private String extractNotedDate(final Node entry) throws XPathExpressionException{
+		final XPathExpression timeStampXpathExp = Utils.getXPathExpression("entryRelationship/observation["
+				+ "templateId/@root='" + PROBLEM_ID_OBSERVATION + "']/effectiveTime/low/@value");
+		return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
+	}
+	
+	private String extractTimestamp(final Node entry) throws XPathExpressionException{
+		final XPathExpression timeStampXpathExp = Utils.getXPathExpression("effectiveTime/low/@value");
+		return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
+	}
+
+	@Override
+	public void setGroupId(String groupId) {
 		// TODO Auto-generated method stub
-		return null;
+		
 	}
 	
-	public static String extractActiveProblem(final Document doc) throws XPathExpressionException { 
-		final CcdaEntryExtractor activeProblemExtractor = new ActiveProblemExtractor();
-		XPathFactory xPathfactory = XPathFactory.newInstance();
-		XPath xpath = xPathfactory.newXPath();
-		XPathExpression expr = xpath.compile("//act[templateId/@root='" + ACTIVE_PROBLEM_ID + "']");
-		
-		NodeList nList = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-		System.out.println("NList" + nList.toString() + "|" + nList.getLength());
-		for (int temp = 0; temp < nList.getLength(); temp++) {
-			Node nNode = nList.item(temp);
-			System.out.println(nNode.toString());
-			String sql  = activeProblemExtractor.extractData(nNode);
-		}
-		
-		return "";
-	}
 
 }
