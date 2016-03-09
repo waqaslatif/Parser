@@ -61,4 +61,8 @@ public final class Utils {
         transformer.transform(new DOMSource(doc), 
              new StreamResult(new OutputStreamWriter(out, "UTF-8")));
     }
+    
+    public static String getM2hid() {
+    	return "200";
+    }
 }
