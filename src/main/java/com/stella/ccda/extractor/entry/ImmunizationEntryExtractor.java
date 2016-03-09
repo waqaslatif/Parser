@@ -1,5 +1,7 @@
 package com.stella.ccda.extractor.entry;
 
+import java.util.UUID;
+
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
@@ -10,6 +12,7 @@ import com.stella.utils.Utils;
 
 public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 	
+	private String immGroupId;
 	private String m2hid;
 	private String name;
 	private String datesPreviouslyGiven;
@@ -19,10 +22,21 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 	private String lastEnquiryDate;
 	private String timeStamp;
 	
-	public String extractData(final Node entry) throws XPathExpressionException {		
+	public String extractData(final Node entry) throws XPathExpressionException {	
 		
-		String sql = "INSERT INTO records.Immunization(m2hid, name, datespreviouslygiven, nextdue, description, reporturl, lastenquirydate, timestamp) "
-					+ "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');";
+		immGroupId = UUID.randomUUID().toString();
+		
+		String sqlImmunGroup = "INSERT INTO records.ImmunizationGroup(id, m2hid) "
+								+ "VALUES('%s' , '%s');";
+		
+		System.out.println("----------------------------");
+		
+		System.out.println("Creating Immunization Group");
+		
+		sqlImmunGroup = String.format(sqlImmunGroup, immGroupId, m2hid);
+		
+		String sqlImmunization = "INSERT INTO records.Immunization(m2hid, name, datespreviouslygiven, nextdue, description, reporturl, lastenquirydate, timestamp, immuGroupId) "
+					+ "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');";
 		
 		System.out.println("----------------------------");
 		
@@ -41,14 +55,14 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 			lastEnquiryDate = getLastEnquiryDate(entry);
 			timeStamp = getTimeStampFromNode(entry);			
 			
-			sql = String.format(sql, m2hid, name, datesPreviouslyGiven, nextDue, description, reportUrl, lastEnquiryDate, timeStamp);	
+			sqlImmunization = String.format(sqlImmunization, m2hid, name, datesPreviouslyGiven, nextDue, description, reportUrl, lastEnquiryDate, timeStamp, immGroupId);	
 			
 			System.out.println("----------------------------");
 			
-			System.out.println("SQL Generated : " + sql);
+			System.out.println("SQL Generated : " + sqlImmunization);
 
 		}
-		return sql;
+		return sqlImmunization;
 	}
 	
 	private String getNameFromNode(final Node entry) throws XPathExpressionException {

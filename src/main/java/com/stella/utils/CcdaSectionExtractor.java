@@ -44,11 +44,10 @@ public class CcdaSectionExtractor {
             doc = dBuilder.parse(xmlFile);
 
             doc.getDocumentElement().normalize();
-
-            // Utils.printDocument(doc, System.out);
-
-            // extractImmunizationSection(doc);
-            extractProgressNoteSection(doc);
+            
+            extractImmunizationSection(doc);
+            
+            //M extractProgressNoteSection(doc);
 
             // ActiveProblemExtractor.extractActiveProblem(doc);
 
