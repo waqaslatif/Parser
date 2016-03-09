@@ -1,4 +1,4 @@
-package apps.stella.ccda.extractor.entry;
+package com.stella.ccda.extractor.entry;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;

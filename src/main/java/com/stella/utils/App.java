@@ -1,4 +1,4 @@
-package apps.stella.utils;
+package com.stella.utils;
 
 
 /**

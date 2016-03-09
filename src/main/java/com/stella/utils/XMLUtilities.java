@@ -1,4 +1,4 @@
-package apps.stella.utils;
+package com.stella.utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +48,7 @@ public final class XMLUtilities {
      *
      * @return The output (transformed) document.
      */
-    public static Document xslt1(final Node document, final Node stylesheet, final URIResolver uriResolver) {
+    public static Document xslt(final Node document, final Node stylesheet, final URIResolver uriResolver) {
 
         try {
             // Use a Transformer for output
@@ -91,7 +91,7 @@ public final class XMLUtilities {
      * @param classPathResource The path (within the classpath) of the resource to load.
      * @return A DOM Document of the classpath resource.
      */
-    public static Document parseResource1(final String classPathResource) {
+    public static Document parseResource(final String classPathResource) {
         try {
             final DocumentBuilder builder = createDocumentBuilder();
             try (final InputStream is = XMLUtilities.class.getResourceAsStream(classPathResource)) {
