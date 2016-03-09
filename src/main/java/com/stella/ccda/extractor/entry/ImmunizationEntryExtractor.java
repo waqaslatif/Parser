@@ -6,8 +6,10 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import com.stella.utils.Utils;
 
 public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 	
@@ -26,7 +28,7 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 		
 		System.out.println("Reading Immunization Section Entry");
 		
-		System.out.println(entry);
+		//System.out.println(Utils.nodeToString(entry));
 		
 		if (entry.getNodeType() == Node.ELEMENT_NODE) {
 
@@ -44,11 +46,7 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 	
 	private String getTimeStampFromNode(final Node entry) throws XPathExpressionException {
 		
-		XPathFactory xPathfactory = XPathFactory.newInstance();
-		XPath xpath = xPathfactory.newXPath();
-		
-		String timeStampXpath = "/entry/substanceAdministration/effectiveTime/@value";                                  
-		XPathExpression timeStampXpathExp = xpath.compile(timeStampXpath);
-		return timeStampXpathExp.evaluate(entry, XPathConstants.STRING).toString();
+		XPathExpression timeStampXpathExp = Utils.getXPathExpression("//substanceAdministration/effectiveTime/@value");
+		return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
 	}	
 }
