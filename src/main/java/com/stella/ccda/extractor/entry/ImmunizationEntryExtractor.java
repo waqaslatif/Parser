@@ -22,7 +22,7 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 	public String extractData(final Node entry) throws XPathExpressionException {		
 		
 		String sql = "INSERT INTO records.Immunization(m2hid, name, datespreviouslygiven, nextdue, description, reporturl, lastenquirydate, timestamp) "
-					+ "VALUES (%s, %s, %s, %s, %s, %s, %s, %s);";
+					+ "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');";
 		
 		System.out.println("----------------------------");
 		
