@@ -9,6 +9,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+/**
+ * @author ali
+ *
+ */
 public class ParserConfig {
 	
 	public static final String DATASET_DIR_PATH = "datasetDir";

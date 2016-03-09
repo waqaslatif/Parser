@@ -1,7 +1,10 @@
 package com.stella.utils;
 
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +28,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import sun.java2d.pipe.SpanShapeRenderer.Simple;
+
 /**
  * XPath utilities creates XPath objects with sensible defaults. There are some methods that simplify the common
  * namespaces for convenience.
@@ -35,6 +40,7 @@ import org.w3c.dom.NodeList;
 public final class Utils {
     
     private static final String EVALUATION_ERROR_MESSAGE = "Unable evaluate XPath expression.";
+    private static final String DATE_FORMAT = "yyyyMMdd";
     // For portability on different systems
     public static final String NEW_LINE = System.getProperty("line.separator");
 
@@ -231,5 +237,12 @@ public final class Utils {
     public static XPathVariableResolver getXmlSanitizingVariableResolver() {
     	final XmlSanitizingVariableResolver resolver = new XmlSanitizingVariableResolver("[a-zA-Z0-9]{1,15}");
 	    return resolver;
+    }
+    
+    public static String getCurrentDate(){
+    	SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
+    	Date currentDate = Calendar.getInstance().getTime();
+    	return format.format(currentDate);
+    	
     }
 }
