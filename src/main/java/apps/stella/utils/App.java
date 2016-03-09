@@ -1,7 +1,7 @@
 package apps.stella.utils;
 
 /**
- * Hello world!
+ * Shamsi
  *
  */
 public class App 
