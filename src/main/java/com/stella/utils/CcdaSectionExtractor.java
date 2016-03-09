@@ -46,6 +46,7 @@ public class CcdaSectionExtractor {
             //M Utils.printDocument(doc, System.out);
 
             extractImmunizationSection(doc);
+            
             ActiveProblemExtractor.extractActiveProblem(doc);
 
         } catch (Exception e) {
@@ -66,7 +67,7 @@ public class CcdaSectionExtractor {
         
         //System.out.println(Utils.nodeToString(sectionNode));
         
-        XPathExpression entryXpathExp = Utils.getXPathExpression("entry");
+        XPathExpression entryXpathExp = Utils.getXPathExpression("./entry");
 		NodeList nList = (NodeList) entryXpathExp.evaluate(sectionNode, XPathConstants.NODESET);
         
         for (int temp = 0; temp < nList.getLength(); temp++) {
