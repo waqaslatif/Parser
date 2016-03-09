@@ -19,7 +19,10 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 	private String lastEnquiryDate;
 	private String timeStamp;
 	
-	public String extractData(final Node entry) throws XPathExpressionException {
+	public String extractData(final Node entry) throws XPathExpressionException {		
+		
+		String sql = "INSERT INTO records.Immunization(m2hid, name, datespreviouslygiven, nextdue, description, reporturl, lastenquirydate, timestamp) "
+					+ "VALUES (%s, %s, %s, %s, %s, %s, %s, %s);";
 		
 		System.out.println("----------------------------");
 		
@@ -28,23 +31,66 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 		//System.out.println(Utils.nodeToString(entry));
 		
 		if (entry.getNodeType() == Node.ELEMENT_NODE) {
-
-			//System.out.println("name : " + eElement.getAttribute("id"));
-			//System.out.println("datesPreviouslyGiven : " + eElement.getElementsByTagName("firstname").item(0).getTextContent());
-			//System.out.println("nextDue : " + eElement.getElementsByTagName("lastname").item(0).getTextContent());
-			//System.out.println("description : " + eElement.getElementsByTagName("nickname").item(0).getTextContent());
-			//System.out.println("reportUrl : " + eElement.getElementsByTagName("salary").item(0).getTextContent());
-			//System.out.println("lastEnquiryDate : " );
-			System.out.println("timeStamp : " + getTimeStampFromNode(entry));
+			
+			m2hid = Utils.getM2hid();
+			name = getNameFromNode(entry);
+			datesPreviouslyGiven = getDatesPreviouslyGiven(entry);
+			nextDue = getNextDue(entry);
+			description = getDescription(entry);
+			reportUrl = getReportUrl(entry);
+			lastEnquiryDate = getLastEnquiryDate(entry);
+			timeStamp = getTimeStampFromNode(entry);			
+			
+			sql = String.format(sql, m2hid, name, datesPreviouslyGiven, nextDue, description, reportUrl, lastEnquiryDate, timeStamp);	
+			
+			System.out.println("----------------------------");
+			
+			System.out.println("SQL Generated : " + sql);
 
 		}
-		return null;
+		return sql;
 	}
 	
 	private String getNameFromNode(final Node entry) throws XPathExpressionException {
 		
-		XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/effectiveTime/@value");
-		return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
+		//XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/consumable/manufacturedProduct/manufacturedMaterial/code/@displayName");
+		//return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
+		return "";
+	}
+	
+	private String getDatesPreviouslyGiven(final Node entry) throws XPathExpressionException {
+		
+		//XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/effectiveTime/@value");
+		//return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
+		return "";
+	}
+		
+	private String getNextDue(final Node entry) throws XPathExpressionException {
+			
+		//XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/effectiveTime/@value");
+		//return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
+		return "";
+	}
+	
+	private String getDescription(final Node entry) throws XPathExpressionException {
+		
+		//XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/effectiveTime/@value");
+		//return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
+		return "";
+	}
+	
+	private String getReportUrl(final Node entry) throws XPathExpressionException {
+		
+		//XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/effectiveTime/@value");
+		//return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
+		return "";
+	}
+	
+	private String getLastEnquiryDate(final Node entry) throws XPathExpressionException {
+		
+		//XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/effectiveTime/@value");
+		//return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
+		return "";
 	}
 	
 	private String getTimeStampFromNode(final Node entry) throws XPathExpressionException {
