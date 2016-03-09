@@ -63,13 +63,19 @@ public class CcdaSectionExtractor {
         System.out.println("Reading Immunization Section");
 
         final Node sectionNode = extractSectionByID(doc, "//section[templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
-        final NodeList entryList = getSectionEntries(sectionNode, "//entry");
-
+        
+        //System.out.println(Utils.nodeToString(sectionNode));
+        
+        final NodeList entryList = getSectionEntries(sectionNode, "entry");
+        
         for (int temp = 0; temp < entryList.getLength(); temp++) {
 
             Node entryNode = entryList.item(temp);
-
-            // System.out.println(Utils.nodeToString(entryNode));
+            
+            
+            //System.out.println("----------------------------");
+            
+            //System.out.println(Utils.nodeToString(entryNode));
 
             String sql = immunizationExtractor.extractData(entryNode);
         }
