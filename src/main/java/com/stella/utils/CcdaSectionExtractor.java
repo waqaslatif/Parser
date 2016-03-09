@@ -12,6 +12,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.stella.ccda.extractor.entry.ActiveProblemExtractor;
 import com.stella.ccda.extractor.entry.CcdaEntryExtractor;
 import com.stella.ccda.extractor.entry.ImmunizationEntryExtractor;
 
@@ -45,6 +46,7 @@ public class CcdaSectionExtractor {
             //M Utils.printDocument(doc, System.out);
 
             extractImmunizationSection(doc);
+            ActiveProblemExtractor.extractActiveProblem(doc);
 
         } catch (Exception e) {
             // TODO Auto-generated catch block
