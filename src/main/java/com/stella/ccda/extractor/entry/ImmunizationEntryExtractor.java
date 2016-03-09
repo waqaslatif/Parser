@@ -41,6 +41,12 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 		return null;
 	}
 	
+	private String getNameFromNode(final Node entry) throws XPathExpressionException {
+		
+		XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/effectiveTime/@value");
+		return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
+	}
+	
 	private String getTimeStampFromNode(final Node entry) throws XPathExpressionException {
 		
 		XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/effectiveTime/@value");
