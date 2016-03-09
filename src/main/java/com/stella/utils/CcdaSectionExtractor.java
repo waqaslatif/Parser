@@ -68,7 +68,7 @@ public class CcdaSectionExtractor {
 
         XPathFactory xPathfactory = XPathFactory.newInstance();
         XPath xpath = xPathfactory.newXPath();
-        XPathExpression expr = xpath.compile("/cda:section[cda:templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
+        XPathExpression expr = xpath.compile("//section[templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
 
         NodeList nList = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
 
