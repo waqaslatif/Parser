@@ -1,11 +1,18 @@
 package com.stella.utils;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.NamespaceContext;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
@@ -34,6 +41,28 @@ public final class Utils {
     private Utils() {
         throw new UnsupportedOperationException("Utility class. Not intended to be intantiated.");
     }
+    
+    public static XPathExpression getXPathExpression(final String xPath) throws XPathExpressionException {
+    	XPathFactory xPathfactory = XPathFactory.newInstance();
+        XPath xpath = xPathfactory.newXPath();
+        
+        XPathExpression xpathExp = xpath.compile(xPath);
+        
+        return xpathExp;
+    }
+    
+    public static String nodeToString(Node node) {
+    	StringWriter sw = new StringWriter();
+    	try {
+    	 Transformer t = TransformerFactory.newInstance().newTransformer();
+    	 t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+    	 t.setOutputProperty(OutputKeys.INDENT, "yes");
+    	 t.transform(new DOMSource(node), new StreamResult(sw));
+    	} catch (TransformerException te) {
+    	 System.out.println("nodeToString Transformer Exception");
+    	}
+    	return sw.toString();
+    	}
 
     /**
      * Creates an XPathFactory using the default instance type (DOM tree).

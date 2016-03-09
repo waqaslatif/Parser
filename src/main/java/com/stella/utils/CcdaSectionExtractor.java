@@ -29,7 +29,7 @@ public class CcdaSectionExtractor {
     private final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     private DocumentBuilder dBuilder;
 
-    private final String IMMUNIZATION_SECION_ID = "2.16.840.1.113883.10.20.22.2.2.1"; // /
+    private final String IMMUNIZATION_SECION_ID = "2.16.840.1.113883.10.20.22.2.2.1";
 
     private final CcdaEntryExtractor immunizationExtractor = new ImmunizationEntryExtractor();
 
@@ -66,17 +66,21 @@ public class CcdaSectionExtractor {
 
         System.out.println("Reading Immunization section");
 
-        XPathFactory xPathfactory = XPathFactory.newInstance();
-        XPath xpath = xPathfactory.newXPath();
+        XPathExpression sectionXpathExp = Utils.getXPathExpression("//section[templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
+        Node sectionNode = (Node) sectionXpathExp.evaluate(doc, XPathConstants.NODE);
         
-        XPathExpression expr = xpath.compile("//section[templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
-
-        NodeList nList = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-
+        //System.out.println(Utils.nodeToString(sectionNode));
+        
+        XPathExpression entryXpathExp = Utils.getXPathExpression("entry");
+		NodeList nList = (NodeList) entryXpathExp.evaluate(sectionNode, XPathConstants.NODESET);
+        
         for (int temp = 0; temp < nList.getLength(); temp++) {
 
-            Node nNode = nList.item(temp);
-            String sql = immunizationExtractor.extractData(nNode);
+            Node entryNode = nList.item(temp);
+            
+            //System.out.println(Utils.nodeToString(entryNode));
+            
+            String sql = immunizationExtractor.extractData(entryNode);
         }
 
         return "";
