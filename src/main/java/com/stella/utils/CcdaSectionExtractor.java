@@ -40,16 +40,16 @@ public class CcdaSectionExtractor {
     private final CcdaEntryExtractor progressNoteEntryExtractor = new ProgressNoteEntryExtractor();
 
     public void extract(final String filePath) {
+    	
+    	StringBuilder sbCcdaSQL = new StringBuilder();
 
         try {
 
             File ccdDatasetDir = new File(filePath);
             if(ccdDatasetDir.isDirectory()) {
-            	List<Document> ccdXmlDocuments = new ArrayList<Document>();
             	for(File ccdFile: ccdDatasetDir.listFiles()) { 
 	            	
-            		System.out.println("----------------------------");
-	
+            		System.out.println("----------------------------");	
 	                System.out.println("Reading File : " + ccdFile.getName());
 	
 	                dBuilder = dbFactory.newDocumentBuilder();
@@ -58,13 +58,16 @@ public class CcdaSectionExtractor {
 	
 	                doc.getDocumentElement().normalize();
 	
-	                extractImmunizationSection(doc);
+	                sbCcdaSQL.append(extractImmunizationSection(doc));
 	                
 	                //extractProgressNoteSection(doc);
 	                
 	                //ccdXmlDocuments.add(doc);
             	}
-                System.out.println(extractActiveProblem(ccdXmlDocuments));
+                //System.out.println(extractActiveProblem(ccdXmlDocuments));
+            	
+            	//TBD:Write this all script into .txt or .sql file
+            	
             }
 
         } catch (Exception e) {
@@ -77,7 +80,6 @@ public class CcdaSectionExtractor {
     private String extractProgressNoteSection(final Document doc) throws XPathExpressionException {
 
         System.out.println("----------------------------");
-
         System.out.println("Reading Progress Note Section");
 
         final Node sectionNode = extractSectionByID(doc, "//section[templateId/@root='" + PROGRESS_NOTE_SECION_ID
@@ -94,8 +96,7 @@ public class CcdaSectionExtractor {
 
     	StringBuilder sbSql = new StringBuilder();
     	
-        System.out.println("----------------------------");
-        
+        System.out.println("----------------------------");        
         System.out.println("Reading Immunization Section");
 
         final Node sectionNode = extractSectionByID(doc, "//section[templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
@@ -124,7 +125,6 @@ public class CcdaSectionExtractor {
             Node entryNode = entryList.item(temp);
 
             // System.out.println("----------------------------");
-
             // System.out.println(Utils.nodeToString(entryNode));
 
             sbSql.append(immunizationExtractor.extractData(entryNode));
