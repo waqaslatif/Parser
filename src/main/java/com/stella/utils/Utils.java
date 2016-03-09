@@ -5,6 +5,14 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -19,8 +27,19 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+
+/**
+ * XPath utilities creates XPath objects with sensible defaults. There are some methods that simplify the common
+ * namespaces for convenience.
+ *
+ * @author Ravi Luthra
+ * @author Corrina Burnley
+ */
 public final class Utils {
     
+	private static final String DATE_FORMAT = "yyyyMMdd";
+    // For portability on different systems
+
     public static final String NEW_LINE = System.getProperty("line.separator");
 
     private Utils() {
@@ -64,5 +83,12 @@ public final class Utils {
     
     public static String getM2hid() {
     	return "200";
+    }
+    
+    public static String getCurrentDate(){
+    	SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
+    	Date currentDate = Calendar.getInstance().getTime();
+    	return format.format(currentDate);
+    	
     }
 }

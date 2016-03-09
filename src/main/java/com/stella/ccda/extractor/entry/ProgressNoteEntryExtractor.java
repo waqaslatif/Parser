@@ -21,4 +21,10 @@ public class ProgressNoteEntryExtractor implements CcdaEntryExtractor {
         return null;
     }
 
+	@Override
+	public void setGroupId(String groupId) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
