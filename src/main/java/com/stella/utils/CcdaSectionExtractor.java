@@ -2,34 +2,30 @@ package com.stella.utils;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.stella.ccda.extractor.entry.ActiveProblemExtractor;
 import com.stella.ccda.extractor.entry.CcdaEntryExtractor;
 import com.stella.ccda.extractor.entry.ImmunizationEntryExtractor;
+import com.stella.ccda.extractor.entry.ProgressNoteEntryExtractor;
 
 /**
  * @author ali
  *
  */
 public class CcdaSectionExtractor {
-	
-	private Document doc;
+
+    private Document doc;
 
     private final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     private DocumentBuilder dBuilder;
@@ -37,8 +33,10 @@ public class CcdaSectionExtractor {
     private static final String IMMUNIZATION_SECION_ID = "2.16.840.1.113883.10.20.22.2.2.1";
     private static final String ACTIVE_PROBLEM_ID = "2.16.840.1.113883.10.20.22.4.3";
     private static final String LINE_BREAK = "\n";
-    
+    private static final String PROGRESS_NOTE_SECION_ID = "1.3.6.1.4.1.19376.1.5.3.1.3.4";
+
     private final CcdaEntryExtractor immunizationExtractor = new ImmunizationEntryExtractor();
+    private final CcdaEntryExtractor progressNoteEntryExtractor = new ProgressNoteEntryExtractor();
 
     public void extract(final String filePath) {
 
@@ -61,11 +59,11 @@ public class CcdaSectionExtractor {
 	                //M Utils.printDocument(doc, System.out);
 	
 	                extractImmunizationSection(doc);
+	                extractProgressNoteSection(doc);
 	                ccdXmlDocuments.add(doc);
             	}
                 System.out.println(extractActiveProblem(ccdXmlDocuments));
             }
-            
 
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -74,26 +72,42 @@ public class CcdaSectionExtractor {
 
     }
 
+    private String extractProgressNoteSection(final Document doc) throws XPathExpressionException {
+
+        System.out.println("----------------------------");
+
+        System.out.println("Reading Progress Note Section");
+
+        final Node sectionNode = extractSectionByID(doc, "//section[templateId/@root='" + PROGRESS_NOTE_SECION_ID
+                + "']");
+
+        if (sectionNode != null) {
+            return progressNoteEntryExtractor.extractData(sectionNode);
+        }
+
+        return "";
+    }
+
     private String extractImmunizationSection(final Document doc) throws XPathExpressionException {
 
         System.out.println("----------------------------");
 
-        System.out.println("Reading Immunization section");
+        System.out.println("Reading Immunization Section");
 
-        XPathExpression sectionXpathExp = Utils.getXPathExpression("//section[templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
-        Node sectionNode = (Node) sectionXpathExp.evaluate(doc, XPathConstants.NODE);
-        
-        //System.out.println(Utils.nodeToString(sectionNode));
-        
-        XPathExpression entryXpathExp = Utils.getXPathExpression("entry");
-		NodeList nList = (NodeList) entryXpathExp.evaluate(sectionNode, XPathConstants.NODESET);
-        
-        for (int temp = 0; temp < nList.getLength(); temp++) {
+        final Node sectionNode = extractSectionByID(doc, "//section[templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
 
-            Node entryNode = nList.item(temp);
-            
-            //System.out.println(Utils.nodeToString(entryNode));
-            
+        // System.out.println(Utils.nodeToString(sectionNode));
+
+        final NodeList entryList = getSectionEntries(sectionNode, "entry");
+
+        for (int temp = 0; temp < entryList.getLength(); temp++) {
+
+            Node entryNode = entryList.item(temp);
+
+            // System.out.println("----------------------------");
+
+            // System.out.println(Utils.nodeToString(entryNode));
+
             String sql = immunizationExtractor.extractData(entryNode);
         }
 
@@ -139,4 +153,15 @@ public class CcdaSectionExtractor {
 		return queryBuffer.toString();
 	}
 	
+
+    private Node extractSectionByID(final Document doc, String sectionXpath) throws XPathExpressionException {
+        XPathExpression sectionXpathExp = Utils.getXPathExpression(sectionXpath);
+        return (Node) sectionXpathExp.evaluate(doc, XPathConstants.NODE);
+    }
+
+    private NodeList getSectionEntries(final Node sectionNode, String entryXpath) throws XPathExpressionException {
+        XPathExpression entryXpathExp = Utils.getXPathExpression(entryXpath);
+        return (NodeList) entryXpathExp.evaluate(sectionNode, XPathConstants.NODESET);
+    }
+
 }
