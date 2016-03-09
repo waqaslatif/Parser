@@ -23,7 +23,7 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 		
 		System.out.println("----------------------------");
 		
-		System.out.println("Reading Immunization Section Entry");
+		System.out.println("Reading Immunization Entry");
 		
 		//System.out.println(Utils.nodeToString(entry));
 		
@@ -43,7 +43,7 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 	
 	private String getTimeStampFromNode(final Node entry) throws XPathExpressionException {
 		
-		XPathExpression timeStampXpathExp = Utils.getXPathExpression("./substanceAdministration/effectiveTime/@value");
+		XPathExpression timeStampXpathExp = Utils.getXPathExpression("/substanceAdministration/effectiveTime/@value");
 		return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
 	}	
 }

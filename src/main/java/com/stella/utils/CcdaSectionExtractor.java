@@ -46,7 +46,8 @@ public class CcdaSectionExtractor {
             // M Utils.printDocument(doc, System.out);
 
             extractImmunizationSection(doc);
-            ActiveProblemExtractor.extractActiveProblem(doc);
+            
+            //ActiveProblemExtractor.extractActiveProblem(doc);
 
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -59,14 +60,14 @@ public class CcdaSectionExtractor {
 
         System.out.println("----------------------------");
 
-        System.out.println("Reading Immunization section");
+        System.out.println("Reading Immunization Section");
 
         final Node sectionNode = extractSectionByID(doc, "//section[templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
-        final NodeList nList = getSectionEntries(sectionNode);
+        final NodeList entryList = getSectionEntries(sectionNode, "//entry");
 
-        for (int temp = 0; temp < nList.getLength(); temp++) {
+        for (int temp = 0; temp < entryList.getLength(); temp++) {
 
-            Node entryNode = nList.item(temp);
+            Node entryNode = entryList.item(temp);
 
             // System.out.println(Utils.nodeToString(entryNode));
 
@@ -76,14 +77,13 @@ public class CcdaSectionExtractor {
         return "";
     }
 
-    private Node extractSectionByID(final Document doc, String sectionID) throws XPathExpressionException {
-        XPathExpression sectionXpathExp = Utils.getXPathExpression("//section[templateId/@root='"
-                + IMMUNIZATION_SECION_ID + "']");
+    private Node extractSectionByID(final Document doc, String sectionXpath) throws XPathExpressionException {
+        XPathExpression sectionXpathExp = Utils.getXPathExpression(sectionXpath);
         return (Node) sectionXpathExp.evaluate(doc, XPathConstants.NODE);
     }
 
-    private NodeList getSectionEntries(final Node sectionNode) throws XPathExpressionException {
-        XPathExpression entryXpathExp = Utils.getXPathExpression("entry");
+    private NodeList getSectionEntries(final Node sectionNode, String entryXpath) throws XPathExpressionException {
+        XPathExpression entryXpathExp = Utils.getXPathExpression(entryXpath);
         return (NodeList) entryXpathExp.evaluate(sectionNode, XPathConstants.NODESET);
     }
 
