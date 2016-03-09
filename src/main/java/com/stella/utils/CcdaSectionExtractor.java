@@ -47,8 +47,8 @@ public class CcdaSectionExtractor {
 
             // M Utils.printDocument(doc, System.out);
 
-            extractImmunizationSection(doc);
-            // extractProgressNoteSection(doc);
+            // extractImmunizationSection(doc);
+            extractProgressNoteSection(doc);
 
             // ActiveProblemExtractor.extractActiveProblem(doc);
 
@@ -70,11 +70,15 @@ public class CcdaSectionExtractor {
 
         final NodeList entryList = getSectionEntries(sectionNode, "entry");
 
+        System.out.println("EntryList Size = " + entryList.getLength());
+
         for (int temp = 0; temp < entryList.getLength(); temp++) {
 
             Node entryNode = entryList.item(temp);
 
             String sql = progressNoteEntryExtractor.extractData(entryNode);
+
+            System.out.println("--------------" + sql);
         }
 
         return "";
