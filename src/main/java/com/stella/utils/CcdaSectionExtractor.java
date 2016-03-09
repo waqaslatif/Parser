@@ -17,8 +17,8 @@ import com.stella.ccda.extractor.entry.CcdaEntryExtractor;
 import com.stella.ccda.extractor.entry.ImmunizationEntryExtractor;
 
 public class CcdaSectionExtractor {
-	
-	private Document doc;
+
+    private Document doc;
 
     private final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     private DocumentBuilder dBuilder;
@@ -43,10 +43,9 @@ public class CcdaSectionExtractor {
 
             doc.getDocumentElement().normalize();
 
-            //M Utils.printDocument(doc, System.out);
+            // M Utils.printDocument(doc, System.out);
 
             extractImmunizationSection(doc);
-            
             ActiveProblemExtractor.extractActiveProblem(doc);
 
         } catch (Exception e) {
@@ -62,25 +61,30 @@ public class CcdaSectionExtractor {
 
         System.out.println("Reading Immunization section");
 
-        XPathExpression sectionXpathExp = Utils.getXPathExpression("//section[templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
-        Node sectionNode = (Node) sectionXpathExp.evaluate(doc, XPathConstants.NODE);
-        
-        //System.out.println(Utils.nodeToString(sectionNode));
-        
-        XPathExpression entryXpathExp = Utils.getXPathExpression("./entry");
-		NodeList nList = (NodeList) entryXpathExp.evaluate(sectionNode, XPathConstants.NODESET);
-        
+        final Node sectionNode = extractSectionByID(doc, "//section[templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
+        final NodeList nList = getSectionEntries(sectionNode);
+
         for (int temp = 0; temp < nList.getLength(); temp++) {
 
             Node entryNode = nList.item(temp);
-            
-            //System.out.println(Utils.nodeToString(entryNode));
-            
+
+            // System.out.println(Utils.nodeToString(entryNode));
+
             String sql = immunizationExtractor.extractData(entryNode);
         }
 
         return "";
     }
-	
-	
+
+    private Node extractSectionByID(final Document doc, String sectionID) throws XPathExpressionException {
+        XPathExpression sectionXpathExp = Utils.getXPathExpression("//section[templateId/@root='"
+                + IMMUNIZATION_SECION_ID + "']");
+        return (Node) sectionXpathExp.evaluate(doc, XPathConstants.NODE);
+    }
+
+    private NodeList getSectionEntries(final Node sectionNode) throws XPathExpressionException {
+        XPathExpression entryXpathExp = Utils.getXPathExpression("entry");
+        return (NodeList) entryXpathExp.evaluate(sectionNode, XPathConstants.NODESET);
+    }
+
 }
