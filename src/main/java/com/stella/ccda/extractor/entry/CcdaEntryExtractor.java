@@ -1,12 +1,14 @@
 package com.stella.ccda.extractor.entry;
 
+import java.text.ParseException;
+
 import javax.xml.xpath.XPathExpressionException;
 
 import org.w3c.dom.Node;
 
 public interface CcdaEntryExtractor {
 	
-	String extractData(Node entry) throws XPathExpressionException;
+	String extractData(Node entry) throws XPathExpressionException, ParseException;
 	
 	//set if you want to make group for that section entries :)
 	void setGroupId(String groupId);

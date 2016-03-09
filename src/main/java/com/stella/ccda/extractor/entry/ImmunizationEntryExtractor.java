@@ -1,5 +1,7 @@
 package com.stella.ccda.extractor.entry;
 
+import java.text.ParseException;
+
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
@@ -27,7 +29,7 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 	}
 	
 	@Override
-	public String extractData(final Node entry) throws XPathExpressionException {	
+	public String extractData(final Node entry) throws XPathExpressionException, ParseException {	
 		
 		final String nameRef = getNamRefFromNode(entry);
 		
@@ -53,7 +55,8 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 			description = getDescription(entry);
 			reportUrl = getReportUrl(entry);
 			lastEnquiryDate = getLastEnquiryDate(entry);
-			timeStamp = getTimeStampFromNode(entry);			
+			timeStamp = getTimeStampFromNode(entry);	
+			timeStamp = Utils.formatStringtoDbDate(timeStamp, "yyyyMMdd");
 			
 			sqlImmunization = String.format(sqlImmunization, m2hid, name, datesPreviouslyGiven, nextDue, description, reportUrl, lastEnquiryDate, timeStamp, immunGroupId);	
 			
@@ -125,7 +128,7 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 		
 		//XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/effectiveTime/@value");
 		//return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
-		return "";
+		return Utils.getCurrentDate();
 	}
 	
 	private String getTimeStampFromNode(final Node entry) throws XPathExpressionException {

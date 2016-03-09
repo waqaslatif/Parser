@@ -1,7 +1,7 @@
 package com.stella.utils;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.text.ParseException;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +33,7 @@ public class CcdaSectionExtractor {
 
     private static final String IMMUNIZATION_SECION_ID = "2.16.840.1.113883.10.20.22.2.2.1";
     private static final String ACTIVE_PROBLEM_ID = "2.16.840.1.113883.10.20.22.4.3";
-    private static final String LINE_BREAK = "\n";
+    //private static final String LINE_BREAK = "\n";
     private static final String PROGRESS_NOTE_SECION_ID = "1.3.6.1.4.1.19376.1.5.3.1.3.4";
 
     private final CcdaEntryExtractor immunizationExtractor = new ImmunizationEntryExtractor();
@@ -77,7 +77,7 @@ public class CcdaSectionExtractor {
 
     }
 
-    private String extractProgressNoteSection(final Document doc) throws XPathExpressionException {
+    private String extractProgressNoteSection(final Document doc) throws XPathExpressionException, ParseException {
 
         System.out.println("----------------------------");
         System.out.println("Reading Progress Note Section");
@@ -92,7 +92,7 @@ public class CcdaSectionExtractor {
         return "";
     }
 
-    private StringBuilder extractImmunizationSection(final Document doc) throws XPathExpressionException {
+    private StringBuilder extractImmunizationSection(final Document doc) throws XPathExpressionException, ParseException {
 
     	StringBuilder sbSql = new StringBuilder();
     	
