@@ -3,6 +3,7 @@ package com.stella.utils;
 
 /**
  * Shamsi
+ * @author ali
  *
  */
 public class App 
@@ -11,10 +12,9 @@ public class App
     {
     	
     	try {
-
     		//TBD take folder path and read all files iteratively
-    		
-    		String filePath = "C:\\Users\\Mansoor\\Desktop\\HUGO CCDA\\HU\\FI\\200601\\HUTTEN_FINLEY_RILEY__02_02_16_1317_1703_20.xml";
+    		ParserConfig config = ParserConfig.getInstance();
+    		String filePath = config.get(ParserConfig.DATASET_DIR_PATH);
     		
     		CcdaSectionExtractor extractor = new CcdaSectionExtractor();
     		extractor.extract(filePath);
