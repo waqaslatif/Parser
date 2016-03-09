@@ -29,7 +29,7 @@ public class CcdaSectionExtractor {
     private final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     private DocumentBuilder dBuilder;
 
-    private final String IMMUNIZATION_SECION_ID = "2.16.840.1.113883.10.20.22.2.2"; // /
+    private final String IMMUNIZATION_SECION_ID = "2.16.840.1.113883.10.20.22.2.2.1"; // /
 
     private final CcdaEntryExtractor immunizationExtractor = new ImmunizationEntryExtractor();
 
@@ -68,6 +68,7 @@ public class CcdaSectionExtractor {
 
         XPathFactory xPathfactory = XPathFactory.newInstance();
         XPath xpath = xPathfactory.newXPath();
+        
         XPathExpression expr = xpath.compile("//section[templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
 
         NodeList nList = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);

@@ -26,7 +26,7 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 		
 		System.out.println("Reading Immunization Section Entry");
 		
-		System.out.println(entry.getNodeType());
+		System.out.println(entry);
 		
 		if (entry.getNodeType() == Node.ELEMENT_NODE) {
 
