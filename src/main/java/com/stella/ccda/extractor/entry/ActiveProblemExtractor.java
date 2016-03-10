@@ -14,32 +14,29 @@ public class ActiveProblemExtractor implements CcdaEntryExtractor {
 	
 	private static final String M2HID = "200";
 	private static final String PROBLEM_ID_OBSERVATION = "2.16.840.1.113883.10.20.22.4.4";
+	private static final String INSERT_PROBLEM_QUERY = "INSERT INTO records.\"ActiveProblem\"(m2hid, name,"
+			+ " noteddate, timestamp, activeproblemgroupid) VALUES ('%s', '%s', '%s', '%s', '%s');";
 	
+	private String groupId;
 	
+	@Override
 	public String extractData(final Node entry) throws XPathExpressionException {
 		if (entry.getNodeType() == Node.ELEMENT_NODE) {
-			String problemName = extractName(entry);
-			String notedDate = extractNotedDate(entry);
-			String timestamp = extractTimestamp(entry);
-			
-			if (notedDate.trim().equals("")) {
-				notedDate = Utils.getCurrentDate();
-			}
-			
-			if (timestamp.trim().equals("")) {
-				timestamp = Utils.getCurrentDate();
-			}
-			
+			final String problemName = extractName(entry);
+			final String notedDate = extractNotedDate(entry);
+			final String timestamp = extractTimestamp(entry);
 			return buildQuery(problemName, notedDate, timestamp);
 		}
 		return null;
 	}
 	
+	@Override
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
+	}
+	
 	public String buildQuery(String problemName, String notedDate, String timestamp) {
-		final String query = "INSERT INTO records.\"ActiveProblem\"(id, m2hid, name, noteddate, timestamp)"
-				+ " VALUES (" + M2HID + ", '" + problemName + "', '"
-				+ notedDate + "','" + timestamp + "');";
-		return query;
+		return String.format(INSERT_PROBLEM_QUERY, M2HID, problemName, notedDate, timestamp, groupId);
 	}
 	
 	private String extractName(final Node entry) throws XPathExpressionException{
@@ -48,18 +45,22 @@ public class ActiveProblemExtractor implements CcdaEntryExtractor {
 	}
 	
 	private String extractNotedDate(final Node entry) throws XPathExpressionException{
-		return Utils.getStringNode(entry, "entryRelationship/observation["
+		final String notedDate = Utils.getStringNode(entry, "entryRelationship/observation["
 				+ "templateId/@root='" + PROBLEM_ID_OBSERVATION + "']/effectiveTime/low/@value");
+		if (notedDate.trim().equals("")) {
+			return Utils.getCurrentDate();
+		} else {
+			return notedDate;
+		}
 	}
 	
 	private String extractTimestamp(final Node entry) throws XPathExpressionException{
-		return Utils.getStringNode(entry, "effectiveTime/low/@value");
-	}
-
-	@Override
-	public void setGroupId(String groupId) {
-		// TODO Auto-generated method stub
-		
+		final String timestamp = Utils.getStringNode(entry, "effectiveTime/low/@value");
+		if (timestamp.trim().equals("")) {
+			return Utils.getCurrentDate();
+		} else {
+			return timestamp;
+		}
 	}
 	
 

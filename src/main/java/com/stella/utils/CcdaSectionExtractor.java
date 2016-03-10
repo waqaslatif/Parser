@@ -2,8 +2,6 @@ package com.stella.utils;
 
 import java.io.File;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -33,6 +31,7 @@ public class CcdaSectionExtractor {
     private static final String PROGRESS_NOTE_SECION_ID = "1.3.6.1.4.1.19376.1.5.3.1.3.4";
     
     private static final String XML_EXTENSION = "xml";
+    private static final String LINE_BREAK = "\n";
 
     private final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     private DocumentBuilder dBuilder;
@@ -41,42 +40,34 @@ public class CcdaSectionExtractor {
     private final CcdaEntryExtractor immunizationExtractor = new ImmunizationEntryExtractor();
     private final CcdaEntryExtractor progressNoteEntryExtractor = new ProgressNoteEntryExtractor();
 
-    public void extract(final String filePath) {
-    	
-    	StringBuilder sbCcdaSQL = new StringBuilder();
+    public void extract(final String directoryPath) {
 
+        StringBuilder sbCcdaSQL = new StringBuilder();
         try {
 
-            File ccdDatasetDir = new File(filePath);
+            File ccdDatasetDir = new File(directoryPath);
             if(ccdDatasetDir.isDirectory()) {
-            	final List<Document> ccdXmlDocuments = new ArrayList<Document>();
             	for(File ccdFile: ccdDatasetDir.listFiles()) { 
-	            	
-            		System.out.println("----------------------------");	
-	                System.out.println("Reading File : " + ccdFile.getName());
-	                
-	                
-	                dBuilder = dbFactory.newDocumentBuilder();
-	
-	                document = dBuilder.parse(ccdFile);
-	
-	                document.getDocumentElement().normalize();
-	
-	                sbCcdaSQL.append(extractImmunizationSection(document));
-	                
-	                //extractProgressNoteSection(doc);
+            		//extractProgressNoteSection(doc);
 	                if (FilenameUtils.getExtension(ccdFile.getName()).equals(XML_EXTENSION)) {
-	                	ccdXmlDocuments.add(document);
+	            		System.out.println("----------------------------");	
+		                System.out.println("Reading File : " + ccdFile.getName());
+		 
+		                dBuilder = dbFactory.newDocumentBuilder();
+		                document = dBuilder.parse(ccdFile);		
+		                document.getDocumentElement().normalize();
+		
+		                sbCcdaSQL.append(extractImmunizationSection(document));
+		                sbCcdaSQL.append(extractProgressNoteSection(document));
+		                sbCcdaSQL.append(extractActiveProblem(document));
 	                }
             	}
-                System.out.println(extractActiveProblem(ccdXmlDocuments));
             	
             	//TBD:Write this all script into .txt or .sql file
             	
             }
-
+            System.out.println(sbCcdaSQL.toString());
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -97,33 +88,33 @@ public class CcdaSectionExtractor {
         return "";
     }
 
-    private StringBuilder extractImmunizationSection(final Document doc) throws XPathExpressionException, ParseException {
+    private StringBuilder extractImmunizationSection(final Document doc) throws XPathExpressionException,
+            ParseException {
 
-    	StringBuilder sbSql = new StringBuilder();
-    	
-        System.out.println("----------------------------");        
+        StringBuilder sbSql = new StringBuilder();
+
+        System.out.println("----------------------------");
         System.out.println("Reading Immunization Section");
 
         final Node sectionNode = extractSectionByID(doc, "//section[templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
 
         // System.out.println(Utils.nodeToString(sectionNode));
-        
+
         final String immGroupId = UUID.randomUUID().toString();
-        
+
         immunizationExtractor.setGroupId(immGroupId);
-		
-		String sqlImmunGroup = "INSERT INTO records.ImmunizationGroup(id, m2hid) "
-								+ "VALUES('%s' , '%s');";
-		
-		sbSql.append(sqlImmunGroup);
-		
-		System.out.println("----------------------------");
-		
-		System.out.println("Creating Immunization Group");
-		
-		sqlImmunGroup = String.format(sqlImmunGroup, immGroupId, Utils.getM2hid());
-		
-		final NodeList entryList = getSectionEntries(sectionNode, "entry");
+
+        String sqlImmunGroup = "INSERT INTO records.ImmunizationGroup(id, m2hid) " + "VALUES('%s' , '%s');";
+
+        sbSql.append(sqlImmunGroup);
+
+        System.out.println("----------------------------");
+
+        System.out.println("Creating Immunization Group");
+
+        sqlImmunGroup = String.format(sqlImmunGroup, immGroupId, Utils.getM2hid());
+
+        final NodeList entryList = getSectionEntries(sectionNode, "entry");
 
         for (int temp = 0; temp < entryList.getLength(); temp++) {
 
@@ -137,45 +128,41 @@ public class CcdaSectionExtractor {
 
         return sbSql;
     }
-    
-    /**
-     * Extracts the content from list of ccd xml documents and converts into list of insert queries.
-     * @param ccdXMLDocumentsList
-     * @return
-     * @throws XPathExpressionException
-     */
-    public static String extractActiveProblem(final List<Document> ccdXMLDocumentsList) throws XPathExpressionException { 
-		final StringBuilder sqlScriptBuffer = new StringBuilder();
-		for(Document ccdXMLDocument: ccdXMLDocumentsList) {
-			sqlScriptBuffer.append(extractActiveProblem(ccdXMLDocument));
-		}
-		return sqlScriptBuffer.toString();		
-	}
 	
     /**
      * Extracts the active problems CCD document and build SQL insert queries for ActiveProblem table.
+     * 
      * @param doc
      * @return
      * @throws XPathExpressionException
      */
-    public static String extractActiveProblem(final Document doc) throws XPathExpressionException { 
+    public String extractActiveProblem(final Document doc) throws XPathExpressionException { 
 		final ActiveProblemExtractor activeProblemExtractor = new ActiveProblemExtractor();
 		final XPathExpression problemExp = Utils.getXPathExpression("//act[templateId"
 				+ "/@root='" + ACTIVE_PROBLEM_ID + "']");
 		final NodeList nList = (NodeList) problemExp.evaluate(doc, XPathConstants.NODESET);
-		final StringBuilder queryBuffer = new StringBuilder();
+		final StringBuilder querybuilder = new StringBuilder();
+		final String problemGroupId = UUID.randomUUID().toString();
+		
+		if (nList.getLength() > 0) {
+	        querybuilder.append(buildActiveProblemGroupSQL(problemGroupId));
+	        activeProblemExtractor.setGroupId(problemGroupId);
+		}
 		
 		for (int temp = 0; temp < nList.getLength(); temp++) {
 			final Node nNode = nList.item(temp);
 			final String query = activeProblemExtractor.extractData(nNode);
-			queryBuffer.append(query);
-			if (temp > 0) {
-				queryBuffer.append("\n");
-			}
+			querybuilder.append("\n");
+			querybuilder.append(query);
 		}
-		return queryBuffer.toString();
+		return querybuilder.toString();
 	}
-	
+    
+    private String buildActiveProblemGroupSQL(final String problemGroupId){
+    	String sqlProblemGroup = "INSERT INTO records.\"ActiveProblemGroup\"(id, m2hid, timestamp)"
+				+ " VALUES ('%s', '%s', '%s');";
+        return String.format(sqlProblemGroup, problemGroupId, Utils.getM2hid(), Utils.getCurrentDate());
+    }
 
     private Node extractSectionByID(final Document doc, String sectionXpath) throws XPathExpressionException {
         XPathExpression sectionXpathExp = Utils.getXPathExpression(sectionXpath);

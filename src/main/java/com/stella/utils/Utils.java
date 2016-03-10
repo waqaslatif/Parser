@@ -25,9 +25,8 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-
 public final class Utils {
-    
+
     // For portability on different systems
 	private static final String DB_DATE_FORMAT = "yyyyMMdd";
 	private static final String ENABLE_OUTPUT = "yes";
@@ -55,7 +54,7 @@ public final class Utils {
         final XPathExpression xpathExp = xpath.compile(xPath);
         return xpathExp;
     }
-    
+
     public static String nodeToString(Node node) {
     	final StringWriter sw = new StringWriter();
     	try {
@@ -68,7 +67,7 @@ public final class Utils {
     	}
     	return sw.toString();
     }
-    
+
     public static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
         final TransformerFactory transformerFactory = TransformerFactory.newInstance();
         final Transformer transformer = transformerFactory.newTransformer();
@@ -81,17 +80,17 @@ public final class Utils {
         transformer.transform(new DOMSource(doc), 
              new StreamResult(new OutputStreamWriter(out, UTF_8_ENCODING)));
     }
-    
+
     public static String getM2hid() {
     	return M2HID;
     }
-    
-    public static String getCurrentDate(){
-    	SimpleDateFormat formatter = new SimpleDateFormat(DB_DATE_FORMAT);
-    	Date currentDate = Calendar.getInstance().getTime();
-    	return formatter.format(currentDate);    	
+
+    public static String getCurrentDate() {
+        SimpleDateFormat formatter = new SimpleDateFormat(DB_DATE_FORMAT);
+        Date currentDate = Calendar.getInstance().getTime();
+        return formatter.format(currentDate);
     }
-    
+
     public static String formatStringtoDbDate(final String timeStamp, final String srcFormat) throws ParseException {
     	Date objDate = new SimpleDateFormat(DB_DATE_FORMAT, Locale.ENGLISH).parse(timeStamp);
     	SimpleDateFormat formatter = new SimpleDateFormat(DB_DATE_FORMAT);
