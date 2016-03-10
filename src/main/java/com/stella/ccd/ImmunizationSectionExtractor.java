@@ -37,6 +37,7 @@ public class ImmunizationSectionExtractor implements CCDElementExtractor {
 	private String reportUrl;
 	private String lastEnquiryDate;
 	private String timeStamp;
+	private String groupTimeStamp;
 	
 	@Override
 	public String extract(Document document) throws XPathExpressionException,
@@ -45,16 +46,19 @@ public class ImmunizationSectionExtractor implements CCDElementExtractor {
         final Node sectionNode = Utils.extractSectionByID(document, "//section[templateId"
         		+ "/@root='" + IMMUNIZATION_SECION_ID + "']");
         immunGroupId = UUID.randomUUID().toString();
-        final String immunGroupQuery = String.format(INSERT_IMMUN_GROUP_QUERY, immunGroupId, Utils.getM2hid(), Utils.getCurrentDate());
+        groupTimeStamp = Utils.extractDocumentTimestamp(document);
+        
+        final String immunGroupQuery = String.format(INSERT_IMMUN_GROUP_QUERY, immunGroupId, 
+        		Utils.getM2hid(), groupTimeStamp);
         sbSql.append(immunGroupQuery);
         sbSql.append("\n");
-
+        
         final NodeList entryList = Utils.getSectionEntries(sectionNode, "entry");
         for (int temp = 0; temp < entryList.getLength(); temp++) {
             Node entryNode = entryList.item(temp);
             sbSql.append(extractEntry(entryNode));
             sbSql.append("\n");
-        }
+        }        
         return sbSql.toString();
 	}	
 	

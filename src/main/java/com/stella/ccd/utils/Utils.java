@@ -39,6 +39,7 @@ public final class Utils {
 	private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 	
     private static final String DB_DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
+	private static final String DOC_TIMESTAMP_FORMAT = "yyyyMMddHHmmssX";
     private static final String ENABLE_OUTPUT = "yes";
     private static final String DISABLE_OUTPUT = "no";
     private static final String XML_METHOD = "xml";
@@ -102,6 +103,15 @@ public final class Utils {
 	public static Node extractSectionByID(final Document doc, String sectionXpath) throws XPathExpressionException {
         XPathExpression sectionXpathExp = Utils.getXPathExpression(sectionXpath);
         return (Node) sectionXpathExp.evaluate(doc, XPathConstants.NODE);
+	}
+	
+	public static String extractDocumentTimestamp(final Node document) throws XPathExpressionException, ParseException{
+		final String timestamp = Utils.getStringNode(document, "//effectiveTime/@value");
+		if (timestamp.trim().equals("")) {
+			return Utils.getCurrentDate();
+		} else {
+			return  formatStringtoDbDate(timestamp,DOC_TIMESTAMP_FORMAT);
+		}
 	}
 	
     public static String getCurrentDate() {

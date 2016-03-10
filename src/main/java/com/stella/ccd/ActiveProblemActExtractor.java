@@ -22,6 +22,8 @@ public class ActiveProblemActExtractor implements CCDElementExtractor {
 	private static final String M2HID = "200";
     private static final String LINE_BREAK = "\n";
     
+	private static final String DATE_TIME_FORMAT = "yyyyMMdd";
+    
 	private static final String ACTIVE_PROBLEM_ID = "2.16.840.1.113883.10.20.22.4.3";
     private static final String PROBLEM_ID_OBSERVATION = "2.16.840.1.113883.10.20.22.4.4";
 	
@@ -29,8 +31,9 @@ public class ActiveProblemActExtractor implements CCDElementExtractor {
 			+ " noteddate, timestamp, activeproblemgroupid) VALUES ('%s', '%s', '%s', '%s', '%s');";
     private static final String INSERT_PROBLEM_GROUP_QUERY = "INSERT INTO records.\"ActiveProblemGroup\"(id, m2hid, timestamp)"
 			+ " VALUES ('%s', '%s', '%s');";
-	private String groupId;
 	
+    private String groupId;
+	private String groupTimestamp;
 	
 	/* (non-Javadoc)
 	 * @see com.stella.ccda.extractor.entry.CCDElementExtractor#extract(org.w3c.dom.Document)
@@ -42,17 +45,18 @@ public class ActiveProblemActExtractor implements CCDElementExtractor {
 				+ "/@root='" + ACTIVE_PROBLEM_ID + "']");
 		final NodeList nList = (NodeList) problemExp.evaluate(document, XPathConstants.NODESET);
 		final StringBuilder querybuilder = new StringBuilder();
-		
-		if (nList.getLength() > 0) {
-			groupId = UUID.randomUUID().toString();
-	        querybuilder.append(buildActiveProblemGroupSQL());
-		}
+		final String documentDate = Utils.extractDocumentTimestamp(document);
 		
 		for (int temp = 0; temp < nList.getLength(); temp++) {
 			final Node nNode = nList.item(temp);
-			final String query = extractActiveProblem(nNode);
+			final String query = extractActiveProblem(nNode, documentDate);
 			querybuilder.append(LINE_BREAK);
 			querybuilder.append(query);
+		}
+		
+		if (nList.getLength() > 0) {
+			groupId = UUID.randomUUID().toString();
+	        querybuilder.insert(0, buildActiveProblemGroupSQL());
 		}
 		return querybuilder.toString();
 	}
@@ -62,12 +66,14 @@ public class ActiveProblemActExtractor implements CCDElementExtractor {
 	 * @param entry active problem element
 	 * @return SQL insert query for active problem
 	 * @throws XPathExpressionException if the xpath used for extracting the elements is invalid.
+	 * @throws ParseException 
 	 */
-	private String extractActiveProblem(final Node entry) throws XPathExpressionException {
+	private String extractActiveProblem(final Node entry, final String documentDate) throws XPathExpressionException, ParseException {
 		if (entry.getNodeType() == Node.ELEMENT_NODE) {
 			final String problemName = extractName(entry);
-			final String notedDate = extractNotedDate(entry);
-			final String timestamp = extractTimestamp(entry);
+			final String notedDate = extractNotedDate(entry, documentDate);
+			final String timestamp = extractTimestamp(entry, documentDate);
+			groupTimestamp = timestamp;
 			return buildQuery(problemName, notedDate, timestamp);
 		}
 		return null;
@@ -99,14 +105,20 @@ public class ActiveProblemActExtractor implements CCDElementExtractor {
 	 * @param entry
 	 * @return
 	 * @throws XPathExpressionException
+	 * @throws ParseException 
 	 */
-	private String extractNotedDate(final Node entry) throws XPathExpressionException{
+	private String extractNotedDate(final Node entry, final String documentDate)
+			throws XPathExpressionException, ParseException{
 		final String notedDate = Utils.getStringNode(entry, "entryRelationship/observation["
 				+ "templateId/@root='" + PROBLEM_ID_OBSERVATION + "']/effectiveTime/low/@value");
 		if (notedDate.trim().equals("")) {
-			return Utils.getCurrentDate();
+			if (documentDate.trim().equals("")) {
+				return Utils.getCurrentDate();
+			} else {
+				return documentDate;
+			}
 		} else {
-			return notedDate;
+			return Utils.formatStringtoDbDate(notedDate, DATE_TIME_FORMAT);
 		}
 	}
 	
@@ -114,13 +126,19 @@ public class ActiveProblemActExtractor implements CCDElementExtractor {
 	 * @param entry
 	 * @return
 	 * @throws XPathExpressionException
+	 * @throws ParseException 
 	 */
-	private String extractTimestamp(final Node entry) throws XPathExpressionException{
+	private String extractTimestamp(final Node entry, final String documentDate) 
+			throws XPathExpressionException, ParseException{
 		final String timestamp = Utils.getStringNode(entry, "effectiveTime/low/@value");
 		if (timestamp.trim().equals("")) {
-			return Utils.getCurrentDate();
+			if (documentDate.trim().equals("")) {
+				return Utils.getCurrentDate();
+			} else {
+				return documentDate;
+			}
 		} else {
-			return timestamp;
+			return  Utils.formatStringtoDbDate(timestamp, DATE_TIME_FORMAT);
 		}
 	}
 	
@@ -128,7 +146,7 @@ public class ActiveProblemActExtractor implements CCDElementExtractor {
 	 * @return
 	 */
 	private String buildActiveProblemGroupSQL(){
-        return String.format(INSERT_PROBLEM_GROUP_QUERY, groupId, Utils.getM2hid(), Utils.getCurrentDate());
+        return String.format(INSERT_PROBLEM_GROUP_QUERY, groupId, Utils.getM2hid(), groupTimestamp);
     }
 
 }

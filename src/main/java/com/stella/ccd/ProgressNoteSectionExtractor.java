@@ -25,18 +25,20 @@ import com.stella.ccd.utils.Utils;
 public class ProgressNoteSectionExtractor implements CCDElementExtractor {
 	
 	private static final String PROGRESS_NOTE_SECION_ID = "1.3.6.1.4.1.19376.1.5.3.1.3.4";
-	
+			
 	private static final String INSERT_PROGRESS_NOTE_QUERY = "INSERT INTO records.\"Report\"(id,m2hid, reportcontent, reportstatus, timestamp)"
             + "VALUES ('%s','%s', '%s', '%s', '%s');";
 	
 	private String reportContent;
     private String reportStatus;
+    private String reportTimestamp;
 
     @Override
 	public String extract(Document document) throws XPathExpressionException,
 			ParseException {
          final Node sectionNode = Utils.extractSectionByID(document, "//section[templateId/@root='" + PROGRESS_NOTE_SECION_ID
                  + "']");
+         reportTimestamp = Utils.extractDocumentTimestamp(document);
          if (sectionNode != null) {
              return extractProgressNotSection(sectionNode);
          }
@@ -49,8 +51,8 @@ public class ProgressNoteSectionExtractor implements CCDElementExtractor {
         	final String m2hid = Utils.getM2hid();
             reportContent = getReportContent(progressNoteSection);
             reportStatus = getReportStatus(progressNoteSection);
-            return String.format(INSERT_PROGRESS_NOTE_QUERY, UUID.randomUUID().toString(), m2hid,
-                    reportContent.replaceAll("'", "\""), reportStatus, new DateTime(DateTimeZone.UTC));
+            return String.format(INSERT_PROGRESS_NOTE_QUERY, UUID.randomUUID().toString(), m2hid, 
+                    reportContent.replaceAll("'", "\""), reportStatus, reportTimestamp);
         }
         return "";
     }
@@ -73,6 +75,5 @@ public class ProgressNoteSectionExtractor implements CCDElementExtractor {
         final XPathExpression sectionXpathExp = Utils.getXPathExpression("title/text()");
         return (String) sectionXpathExp.evaluate(entry, XPathConstants.STRING);
     }
-	
 
 }
