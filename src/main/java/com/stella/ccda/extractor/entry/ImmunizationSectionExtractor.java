@@ -21,6 +21,13 @@ public class ImmunizationSectionExtractor implements CCDElementExtractor {
 	
 	private static final String IMMUNIZATION_SECION_ID = "2.16.840.1.113883.10.20.22.2.2.1";
 	
+	private static final String INSERT_IMMUN_GROUP_QUERY = "INSERT INTO records.\"ImmunizationGroup\" "
+			+ "(id, m2hid, timestamp) VALUES('%s' , '%s', '%s');";
+	
+	private static final String INSERT_IMMUNIZATION_QUERY = "INSERT INTO records.\"Immunization\" (m2hid, name,"
+			+ " datespreviouslygiven, nextdue, description, reporturl, lastenquirydate, timestamp, immunGroupId)"
+			+ " VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');";
+	
 	private String immunGroupId;
 	private String m2hid;
 	private String name;
@@ -35,25 +42,15 @@ public class ImmunizationSectionExtractor implements CCDElementExtractor {
 	public String extract(Document document) throws XPathExpressionException,
 			ParseException {
 	 	final StringBuilder sbSql = new StringBuilder();
-        LOG.info("----------------------------");
-        LOG.info("Reading Immunization Section");
-
-        final Node sectionNode = Utils.extractSectionByID(document, "//section[templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
+        final Node sectionNode = Utils.extractSectionByID(document, "//section[templateId"
+        		+ "/@root='" + IMMUNIZATION_SECION_ID + "']");
         immunGroupId = UUID.randomUUID().toString();
-
-        String sqlImmunGroup = "INSERT INTO records.\"ImmunizationGroup\" (id, m2hid, timestamp) "
-                + "VALUES('%s' , '%s', '%s');";
-        LOG.info("----------------------------");
-        LOG.info("Creating Immunization Group");
-
-        sqlImmunGroup = String.format(sqlImmunGroup, immunGroupId, Utils.getM2hid(), Utils.getCurrentDate());
-        sbSql.append(sqlImmunGroup);
+        
+        sbSql.append(INSERT_IMMUN_GROUP_QUERY);
         sbSql.append("\n");
 
         final NodeList entryList = Utils.getSectionEntries(sectionNode, "entry");
-
         for (int temp = 0; temp < entryList.getLength(); temp++) {
-
             Node entryNode = entryList.item(temp);
             sbSql.append(extractEntry(entryNode));
             sbSql.append("\n");
@@ -64,23 +61,9 @@ public class ImmunizationSectionExtractor implements CCDElementExtractor {
 	private String extractEntry(final Node entry) throws XPathExpressionException, ParseException {	
 		
 		final String nameRef = getNamRefFromNode(entry);
-		
-		LOG.info("----------------------------");		
-		LOG.info("Name Ref : " + nameRef);
-		
-		
-		String sqlImmunization = "INSERT INTO records.\"Immunization\" (m2hid, name, datespreviouslygiven, nextdue, description, reporturl, lastenquirydate, timestamp, immunGroupId) "
-					+ "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');";
-		
-		LOG.info("----------------------------");		
-		LOG.info("Reading Immunization Entry");
-		
-		//System.out.println(Utils.nodeToString(entry));
-		
 		if (entry.getNodeType() == Node.ELEMENT_NODE) {
 			
 			m2hid = Utils.getM2hid();
-			
 			name = getNameFromNode(entry, nameRef);
 			datesPreviouslyGiven = getDatesPreviouslyGiven(entry, nameRef);
 			nextDue = getNextDue(entry, nameRef);
@@ -90,56 +73,43 @@ public class ImmunizationSectionExtractor implements CCDElementExtractor {
 			timeStamp = getTimeStampFromNode(entry);	
 			timeStamp = Utils.formatStringtoDbDate(timeStamp, "yyyyMMdd");
 			
-			sqlImmunization = String.format(sqlImmunization, m2hid, name, datesPreviouslyGiven, nextDue, description, reportUrl, lastEnquiryDate, timeStamp, immunGroupId);	
-			
-			LOG.info("----------------------------");			
-			LOG.info("SQL Generated : " + sqlImmunization);
-
+			return String.format(INSERT_IMMUNIZATION_QUERY, m2hid, name, datesPreviouslyGiven, nextDue, 
+					description, reportUrl, lastEnquiryDate, timeStamp, immunGroupId);	
 		}
-		return sqlImmunization;
+		return "";
 	}
 	
 	private String getNamRefFromNode(final Node entry) throws XPathExpressionException {
-		
-		XPathExpression nameRefXpathExp = Utils.getXPathExpression("substanceAdministration/text/reference/@value");
-		String nameRef =  nameRefXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
+		String nameRef =  Utils.getStringNode(entry, "substanceAdministration/text/reference/@value");
 		return nameRef = nameRef.replace("#", "");
 	}
 	
 	private String getNameFromNode(final Node entry, final String nameRef) throws XPathExpressionException {
-		
-		XPathExpression nameXpathExp = Utils.getXPathExpression("../text/table/tbody/tr[@ID='" + nameRef + "']/td[1]/text()");
-		return nameXpathExp.evaluate(entry,  XPathConstants.STRING).toString();		
+		return Utils.getStringNode(entry, "../text/table/tbody/tr[@ID='" + nameRef + "']/td[1]/text()");
 	}
 	
 	private String getDatesPreviouslyGiven(final Node entry, final String nameRef) throws XPathExpressionException {
 		
 		String strDates = "";
-		
 		XPathExpression datesPreviouslyXpathExp = Utils.getXPathExpression("../text/table/tbody/tr[@ID='" + nameRef + "']/td[2]/content");
 		NodeList datesList = (NodeList) datesPreviouslyXpathExp.evaluate(entry,  XPathConstants.NODESET);
 		
 		for (int temp = 0; temp < datesList.getLength(); temp++) {
-
             Node dateNode = datesList.item(temp);
-
-            //System.out.println("----------------------------");
-            //System.out.println("Dates : " + Utils.nodeToString(dateNode));
-            
             if(temp > 0) {
             	strDates += ", ";
             }
-
             strDates += Utils.nodeToString(dateNode);
         }
-		
 		return strDates;
 	}
 		
 	private String getNextDue(final Node entry, final String nameRef) throws XPathExpressionException {
-			
-		XPathExpression nextDueXpathExp = Utils.getXPathExpression("../text/table/tbody/tr[@ID='" + nameRef + "']/td[3]/text()");
-		return nextDueXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
+		return Utils.getStringNode(entry, "../text/table/tbody/tr[@ID='" + nameRef + "']/td[3]/text()");
+	}
+	
+	private String getTimeStampFromNode(final Node entry) throws XPathExpressionException {
+		return Utils.getStringNode(entry, "substanceAdministration/effectiveTime/@value");
 	}
 	
 	private String getDescription(final Node entry) throws XPathExpressionException {
@@ -161,12 +131,6 @@ public class ImmunizationSectionExtractor implements CCDElementExtractor {
 		//XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/effectiveTime/@value");
 		//return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
 		return Utils.getCurrentDate();
-	}
-	
-	private String getTimeStampFromNode(final Node entry) throws XPathExpressionException {
-		
-		XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/effectiveTime/@value");
-		return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
 	}
 	
 }

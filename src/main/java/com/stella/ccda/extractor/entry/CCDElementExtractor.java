@@ -8,6 +8,14 @@ import org.w3c.dom.Document;
 
 public interface CCDElementExtractor {
 	
-	String extract(Document document)throws XPathExpressionException, ParseException;
+	/**
+	 * Extracts the discrete information from CCD document element and 
+	 * compose a sql script for the element.
+	 * @param document XML Document Object
+	 * @return SQL Script composed from extracting CCD Element
+	 * @throws XPathExpressionException if invalid XPath is used for parsing the element.
+	 * @throws ParseException
+	 */
+	String extract(Document document)throws ParseException, XPathExpressionException;
 
 }

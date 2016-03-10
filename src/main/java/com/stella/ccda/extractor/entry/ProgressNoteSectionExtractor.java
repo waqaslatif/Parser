@@ -15,7 +15,6 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import com.stella.utils.CCDSQLScriptBuilder;
 import com.stella.utils.Utils;
 
 /**
@@ -29,7 +28,7 @@ public class ProgressNoteSectionExtractor implements CCDElementExtractor {
 	
 	private static final String PROGRESS_NOTE_SECION_ID = "1.3.6.1.4.1.19376.1.5.3.1.3.4";
 	
-	final String INSERT_PROGRESS_NOTE_QUERY = "INSERT INTO records.\"Report\"(id,m2hid, reportcontent, reportstatus, timestamp)"
+	private static final String INSERT_PROGRESS_NOTE_QUERY = "INSERT INTO records.\"Report\"(id,m2hid, reportcontent, reportstatus, timestamp)"
             + "VALUES ('%s','%s', '%s', '%s', '%s');";
 	
 	private String reportContent;
@@ -51,11 +50,8 @@ public class ProgressNoteSectionExtractor implements CCDElementExtractor {
 	}
     
     public String extractProgressNotSection(final Node progressNoteSection) throws DOMException, XPathExpressionException {
-
-        final String m2hid = Utils.getM2hid();
-
         if (progressNoteSection.getNodeType() == Node.ELEMENT_NODE) {
-
+        	final String m2hid = Utils.getM2hid();
             reportContent = getReportContent(progressNoteSection);
             reportStatus = getReportStatus(progressNoteSection);
             return String.format(INSERT_PROGRESS_NOTE_QUERY, UUID.randomUUID().toString(), m2hid,
@@ -67,13 +63,12 @@ public class ProgressNoteSectionExtractor implements CCDElementExtractor {
     private String getReportContent(final Node entry) throws XPathExpressionException {
         final XPathExpression sectionXpathExp = Utils.getXPathExpression("text");
         final Node reportContent = (Node) sectionXpathExp.evaluate(entry, XPathConstants.NODE);
-
         if (reportContent.getNodeType() == Node.ELEMENT_NODE) {
+        	
             final StringBuffer buffer = new StringBuffer();
             for (int i = 0; i < reportContent.getChildNodes().getLength(); i++) {
                 buffer.append(Utils.nodeToString(reportContent.getChildNodes().item(i)));
             }
-
             return buffer.toString();
         }
         return null;
