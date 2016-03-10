@@ -8,40 +8,44 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSSerializer;
 
 import com.stella.utils.Utils;
 
 public class ProgressNoteEntryExtractor implements CcdaEntryExtractor {
-    String reportContent;
-    String reportStatus;
-    String sourceAddress;
-    String timeStamp;
+    private String reportContent;
+    private String reportStatus;
+    private String sourceAddress;
 
-    public String extractData(final Node entry) throws DOMException, XPathExpressionException {
+    public String extractData(final Node progressNoteSection) throws DOMException, XPathExpressionException {
+
+        final String sqlProgressNote = "INSERT INTO records.Report(m2hid, reportcontent, reportstatus, timestamp)"
+                + "VALUES ('%s', '%s', '%s', '%s');";
 
         // System.out.println("\n Current Element :" + Utils.nodeToString(entry));
         final String m2hid = Utils.getM2hid();
 
-        if (entry.getNodeType() == Node.ELEMENT_NODE) {
+        if (progressNoteSection.getNodeType() == Node.ELEMENT_NODE) {
 
-            // System.out.println("------------- report content :" + innerXml(getReportContent(entry)));
-
-            System.out.println("------------- report status :  " + getReportStatus(entry));
-
-            final DateTime dateTime = new DateTime(DateTimeZone.UTC);
-
-            System.out.println("------------- Timestamp :  " + dateTime.toString());
-
+            reportContent = getReportContent(progressNoteSection);
+            reportStatus = getReportStatus(progressNoteSection);
+            return String.format(sqlProgressNote, m2hid, reportContent, reportStatus, new DateTime(DateTimeZone.UTC));
         }
         return "";
     }
 
-    private Node getReportContent(final Node entry) throws XPathExpressionException {
+    private String getReportContent(final Node entry) throws XPathExpressionException {
         final XPathExpression sectionXpathExp = Utils.getXPathExpression("text");
-        return (Node) sectionXpathExp.evaluate(entry, XPathConstants.NODE);
+        final Node reportContent = (Node) sectionXpathExp.evaluate(entry, XPathConstants.NODE);
+
+        if (reportContent.getNodeType() == Node.ELEMENT_NODE) {
+            final StringBuffer buffer = new StringBuffer();
+            for (int i = 0; i < reportContent.getChildNodes().getLength(); i++) {
+                buffer.append(Utils.nodeToString(reportContent.getChildNodes().item(i)));
+            }
+
+            return buffer.toString();
+        }
+        return null;
     }
 
     private String getReportStatus(final Node entry) throws XPathExpressionException {

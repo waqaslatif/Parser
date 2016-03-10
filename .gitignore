@@ -7,3 +7,7 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
+.project
+.settings/org.eclipse.jdt.core.prefs
+.settings/
+.classpath
