@@ -28,7 +28,6 @@ public class ProgressNoteEntryExtractor implements CcdaEntryExtractor {
 
             reportContent = getReportContent(progressNoteSection);
             reportStatus = getReportStatus(progressNoteSection);
-
             return String.format(sqlProgressNote, m2hid, reportContent, reportStatus, new DateTime(DateTimeZone.UTC));
         }
         return "";
