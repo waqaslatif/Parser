@@ -37,7 +37,7 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 		System.out.println("Name Ref : " + nameRef);
 		
 		
-		String sqlImmunization = "INSERT INTO records.Immunization(m2hid, name, datespreviouslygiven, nextdue, description, reporturl, lastenquirydate, timestamp, immunGroupId) "
+		String sqlImmunization = "INSERT INTO records.\"Immunization\" (m2hid, name, datespreviouslygiven, nextdue, description, reporturl, lastenquirydate, timestamp, immunGroupId) "
 					+ "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');";
 		
 		System.out.println("----------------------------");		
@@ -95,7 +95,7 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
             //System.out.println("Dates : " + Utils.nodeToString(dateNode));
             
             if(temp > 0) {
-            	strDates += " , ";
+            	strDates += ", ";
             }
 
             strDates += Utils.nodeToString(dateNode);

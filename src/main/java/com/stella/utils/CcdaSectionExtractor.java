@@ -1,6 +1,13 @@
 package com.stella.utils;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.UUID;
 
@@ -22,6 +29,8 @@ import com.stella.ccda.extractor.entry.ProgressNoteEntryExtractor;
 
 /**
  * @author ali
+ * @author Shamsi
+ * @author Waqas
  *
  */
 public class CcdaSectionExtractor {
@@ -41,10 +50,8 @@ public class CcdaSectionExtractor {
     private final CcdaEntryExtractor progressNoteEntryExtractor = new ProgressNoteEntryExtractor();
 
     public void extract(final String directoryPath) {
-
         StringBuilder sbCcdaSQL = new StringBuilder();
         try {
-
             File ccdDatasetDir = new File(directoryPath);
             if(ccdDatasetDir.isDirectory()) {
             	for(File ccdFile: ccdDatasetDir.listFiles()) { 
@@ -63,8 +70,10 @@ public class CcdaSectionExtractor {
 	                }
             	}
             	
-            	//TBD:Write this all script into .txt or .sql file
-            	
+                System.out.println("----------------------------");
+                System.out.println("Generating SQL File");
+                createSqlFile(sbCcdaSQL.toString(), directoryPath);
+            
             }
             System.out.println(sbCcdaSQL.toString());
         } catch (Exception e) {
@@ -103,18 +112,20 @@ public class CcdaSectionExtractor {
         final String immGroupId = UUID.randomUUID().toString();
 
         immunizationExtractor.setGroupId(immGroupId);
-
-        String sqlImmunGroup = "INSERT INTO records.ImmunizationGroup(id, m2hid) " + "VALUES('%s' , '%s');";
-
-        sbSql.append(sqlImmunGroup);
-
-        System.out.println("----------------------------");
-
-        System.out.println("Creating Immunization Group");
-
-        sqlImmunGroup = String.format(sqlImmunGroup, immGroupId, Utils.getM2hid());
-
-        final NodeList entryList = getSectionEntries(sectionNode, "entry");
+		
+		String sqlImmunGroup = "INSERT INTO records.\"ImmunizationGroup\" (id, m2hid, timestamp) "
+								+ "VALUES('%s' , '%s', '%s');";
+		
+		sbSql.append(sqlImmunGroup);
+		sbSql.append("\n");
+		
+		System.out.println("----------------------------");
+		
+		System.out.println("Creating Immunization Group");
+		
+		sqlImmunGroup = String.format(sqlImmunGroup, immGroupId, Utils.getM2hid(), Utils.getCurrentDate());
+		
+		final NodeList entryList = getSectionEntries(sectionNode, "entry");
 
         for (int temp = 0; temp < entryList.getLength(); temp++) {
 
@@ -124,6 +135,7 @@ public class CcdaSectionExtractor {
             // System.out.println(Utils.nodeToString(entryNode));
 
             sbSql.append(immunizationExtractor.extractData(entryNode));
+            sbSql.append("\n");
         }
 
         return sbSql;
@@ -172,6 +184,23 @@ public class CcdaSectionExtractor {
     private NodeList getSectionEntries(final Node sectionNode, String entryXpath) throws XPathExpressionException {
         XPathExpression entryXpathExp = Utils.getXPathExpression(entryXpath);
         return (NodeList) entryXpathExp.evaluate(sectionNode, XPathConstants.NODESET);
+    }
+    
+    private void createSqlFile(final String strSql, final String dirPath) throws IOException {
+    	
+    	File file = new File(dirPath + "\\hugo_ccda.sql");
+
+		// if file doesnt exists, then create it
+		if (!file.exists()) {
+			file.createNewFile();
+		}
+
+		FileWriter fw = new FileWriter(file.getAbsoluteFile());
+		BufferedWriter bw = new BufferedWriter(fw);
+		bw.write(strSql);
+		bw.close();
+
+		System.out.println("Done");
     }
 
 }

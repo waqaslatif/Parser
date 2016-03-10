@@ -27,8 +27,7 @@ import org.w3c.dom.Node;
 
 public final class Utils {
 
-    // For portability on different systems
-	private static final String DB_DATE_FORMAT = "yyyyMMdd";
+    private static final String DB_DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
 	private static final String ENABLE_OUTPUT = "yes";
 	private static final String DISABLE_OUTPUT = "no";
 	private static final String XML_METHOD = "xml";
