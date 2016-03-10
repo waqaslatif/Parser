@@ -4,21 +4,15 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.ParseException;
-import java.util.UUID;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.stella.ccda.extractor.entry.ActiveProblemActExtractor;
 import com.stella.ccda.extractor.entry.CCDElementExtractor;
@@ -32,48 +26,43 @@ import com.stella.ccda.extractor.entry.ProgressNoteSectionExtractor;
  *
  */
 public class CCDSQLScriptBuilder {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(CCDSQLScriptBuilder.class);
-   
-	private static final String XML_EXTENSION = "xml";
-    private static final String LINE_BREAK = "\n";
 
+    private static final Logger LOG = LoggerFactory.getLogger(CCDSQLScriptBuilder.class);
+
+    private static final String XML_EXTENSION = "xml";
     private final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     private DocumentBuilder dBuilder;
     private Document document;
 
     private final CCDElementExtractor immunizationExtractor = new ImmunizationSectionExtractor();
     private final CCDElementExtractor progressNoteEntryExtractor = new ProgressNoteSectionExtractor();
+    private final CCDElementExtractor activeProblemExtractor = new ActiveProblemActExtractor();
 
     public void build(final String directoryPath) {
         StringBuilder sbCcdaSQL = new StringBuilder();
         try {
             File ccdDatasetDir = new File(directoryPath);
-            if(ccdDatasetDir.isDirectory()) {
-            	for(File ccdFile: ccdDatasetDir.listFiles()) { 
-            		//extractProgressNoteSection(doc);
-	                if (FilenameUtils.getExtension(ccdFile.getName()).equals(XML_EXTENSION)) {
-	            		LOG.info("----------------------------");	
-		                LOG.info("Reading File : " + ccdFile.getName());
-		 
-		                dBuilder = dbFactory.newDocumentBuilder();
-		                document = dBuilder.parse(ccdFile);		
-		                document.getDocumentElement().normalize();
-		                
+            if (ccdDatasetDir.isDirectory()) {
+                for (File ccdFile : ccdDatasetDir.listFiles()) {
+                    // extractProgressNoteSection(doc);
+                    if (FilenameUtils.getExtension(ccdFile.getName()).equals(XML_EXTENSION)) {
+                        LOG.info("----------------------------");
+                        LOG.info("Reading File : " + ccdFile.getName());
 
-		                final CCDElementExtractor immunizationExtractor = new ImmunizationSectionExtractor();
-		                sbCcdaSQL.append(immunizationExtractor.extract(document));
-		                final CCDElementExtractor progressNoteExtractor = new ProgressNoteSectionExtractor();
-		                sbCcdaSQL.append(progressNoteExtractor.extract(document));
-		                final CCDElementExtractor activeProblemExtractor = new ActiveProblemActExtractor();
-		                sbCcdaSQL.append(activeProblemExtractor.extract(document));
-	                }
-            	}
-            	
+                        dBuilder = dbFactory.newDocumentBuilder();
+                        document = dBuilder.parse(ccdFile);
+                        document.getDocumentElement().normalize();
+
+                        sbCcdaSQL.append(immunizationExtractor.extract(document));
+                        sbCcdaSQL.append(progressNoteEntryExtractor.extract(document));
+                        sbCcdaSQL.append(activeProblemExtractor.extract(document));
+                    }
+                }
+
                 LOG.info("----------------------------");
                 LOG.info("Generating SQL File");
                 writeSQLFile(sbCcdaSQL.toString(), directoryPath);
-            
+
             }
             LOG.info(sbCcdaSQL.toString());
         } catch (Exception e) {
@@ -81,7 +70,7 @@ public class CCDSQLScriptBuilder {
         }
 
     }
-	
+
     /**
      * Extracts the active problems CCD document and build SQL insert queries for ActiveProblem table.
      * 
@@ -96,7 +85,7 @@ public class CCDSQLScriptBuilder {
         if (!file.exists()) {
             file.createNewFile();
         }
-        
+
         final FileWriter fw = new FileWriter(file.getAbsoluteFile());
         final BufferedWriter bw = new BufferedWriter(fw);
         bw.write(strSql);
