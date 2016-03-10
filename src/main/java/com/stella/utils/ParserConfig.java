@@ -12,7 +12,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.stella.ccda.extractor.entry.ImmunizationEntryExtractor;
+import com.stella.ccda.extractor.entry.ImmunizationSectionExtractor;
 
 /**
  * @author ali

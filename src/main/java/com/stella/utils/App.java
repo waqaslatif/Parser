@@ -12,8 +12,8 @@ public class App {
             final ParserConfig config = ParserConfig.getInstance();
             final String filePath = config.get(ParserConfig.DATASET_DIR_PATH);
 
-            final CcdaSectionExtractor extractor = new CcdaSectionExtractor();
-            extractor.extract(filePath);
+            final CCDSQLScriptBuilder extractor = new CCDSQLScriptBuilder();
+            extractor.build(filePath);
 
         } catch (Exception e) {
             e.printStackTrace();

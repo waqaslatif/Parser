@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public final class Utils {
 	
@@ -86,7 +87,17 @@ public final class Utils {
     public static String getM2hid() {
         return M2HID;
     }
-
+    
+    public static NodeList getSectionEntries(final Node sectionNode, String entryXpath) throws XPathExpressionException {
+        XPathExpression entryXpathExp = Utils.getXPathExpression(entryXpath);
+        return (NodeList) entryXpathExp.evaluate(sectionNode, XPathConstants.NODESET);
+    }
+	
+	public static Node extractSectionByID(final Document doc, String sectionXpath) throws XPathExpressionException {
+        XPathExpression sectionXpathExp = Utils.getXPathExpression(sectionXpath);
+        return (Node) sectionXpathExp.evaluate(doc, XPathConstants.NODE);
+	}
+	
     public static String getCurrentDate() {
         SimpleDateFormat formatter = new SimpleDateFormat(DB_DATE_FORMAT);
         Date currentDate = Calendar.getInstance().getTime();

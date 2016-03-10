@@ -1,6 +1,7 @@
 package com.stella.ccda.extractor.entry;
 
 import java.text.ParseException;
+import java.util.UUID;
 
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
@@ -8,14 +9,17 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.stella.utils.Utils;
 
-public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
+public class ImmunizationSectionExtractor implements CCDElementExtractor {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ImmunizationEntryExtractor.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ImmunizationSectionExtractor.class);
+	
+	private static final String IMMUNIZATION_SECION_ID = "2.16.840.1.113883.10.20.22.2.2.1";
 	
 	private String immunGroupId;
 	private String m2hid;
@@ -28,12 +32,36 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 	private String timeStamp;
 	
 	@Override
-	public void setGroupId(final String groupId) {
-		this.immunGroupId =  groupId;
-	}
+	public String extract(Document document) throws XPathExpressionException,
+			ParseException {
+	 	final StringBuilder sbSql = new StringBuilder();
+        LOG.info("----------------------------");
+        LOG.info("Reading Immunization Section");
+
+        final Node sectionNode = Utils.extractSectionByID(document, "//section[templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
+        immunGroupId = UUID.randomUUID().toString();
+
+        String sqlImmunGroup = "INSERT INTO records.\"ImmunizationGroup\" (id, m2hid, timestamp) "
+                + "VALUES('%s' , '%s', '%s');";
+        LOG.info("----------------------------");
+        LOG.info("Creating Immunization Group");
+
+        sqlImmunGroup = String.format(sqlImmunGroup, immunGroupId, Utils.getM2hid(), Utils.getCurrentDate());
+        sbSql.append(sqlImmunGroup);
+        sbSql.append("\n");
+
+        final NodeList entryList = Utils.getSectionEntries(sectionNode, "entry");
+
+        for (int temp = 0; temp < entryList.getLength(); temp++) {
+
+            Node entryNode = entryList.item(temp);
+            sbSql.append(extractEntry(entryNode));
+            sbSql.append("\n");
+        }
+        return sbSql.toString();
+	}	
 	
-	@Override
-	public String extractData(final Node entry) throws XPathExpressionException, ParseException {	
+	private String extractEntry(final Node entry) throws XPathExpressionException, ParseException {	
 		
 		final String nameRef = getNamRefFromNode(entry);
 		
@@ -139,5 +167,6 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 		
 		XPathExpression timeStampXpathExp = Utils.getXPathExpression("substanceAdministration/effectiveTime/@value");
 		return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
-	}	
+	}
+	
 }
