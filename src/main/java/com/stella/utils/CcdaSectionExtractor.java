@@ -22,6 +22,8 @@ import com.stella.ccda.extractor.entry.ProgressNoteEntryExtractor;
 
 /**
  * @author ali
+ * @author Shamsi
+ * @author Waqas
  *
  */
 public class CcdaSectionExtractor {
@@ -107,8 +109,8 @@ public class CcdaSectionExtractor {
         
         immunizationExtractor.setGroupId(immGroupId);
 		
-		String sqlImmunGroup = "INSERT INTO records.ImmunizationGroup(id, m2hid) "
-								+ "VALUES('%s' , '%s');";
+		String sqlImmunGroup = "INSERT INTO records.ImmunizationGroup(id, m2hid, timestamp) "
+								+ "VALUES('%s' , '%s', '%s');";
 		
 		sbSql.append(sqlImmunGroup);
 		
@@ -116,7 +118,7 @@ public class CcdaSectionExtractor {
 		
 		System.out.println("Creating Immunization Group");
 		
-		sqlImmunGroup = String.format(sqlImmunGroup, immGroupId, Utils.getM2hid());
+		sqlImmunGroup = String.format(sqlImmunGroup, immGroupId, Utils.getM2hid(), Utils.getCurrentDate());
 		
 		final NodeList entryList = getSectionEntries(sectionNode, "entry");
 
