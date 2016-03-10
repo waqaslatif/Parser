@@ -1,5 +1,7 @@
 package com.stella.ccda.extractor.entry;
 
+import java.util.UUID;
+
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
@@ -11,6 +13,11 @@ import org.w3c.dom.Node;
 
 import com.stella.utils.Utils;
 
+/**
+ * 
+ * @author WaqasLatif
+ *
+ */
 public class ProgressNoteEntryExtractor implements CcdaEntryExtractor {
     private String reportContent;
     private String reportStatus;
@@ -18,17 +25,17 @@ public class ProgressNoteEntryExtractor implements CcdaEntryExtractor {
 
     public String extractData(final Node progressNoteSection) throws DOMException, XPathExpressionException {
 
-        final String sqlProgressNote = "INSERT INTO records.Report(m2hid, reportcontent, reportstatus, timestamp)"
-                + "VALUES ('%s', '%s', '%s', '%s');";
+        final String sqlProgressNote = "INSERT INTO records.Report(id,m2hid, reportcontent, reportstatus, timestamp)"
+                + "VALUES ('%s','%s', '%s', '%s', '%s');";
 
-        // System.out.println("\n Current Element :" + Utils.nodeToString(entry));
         final String m2hid = Utils.getM2hid();
 
         if (progressNoteSection.getNodeType() == Node.ELEMENT_NODE) {
 
             reportContent = getReportContent(progressNoteSection);
             reportStatus = getReportStatus(progressNoteSection);
-            return String.format(sqlProgressNote, m2hid, reportContent, reportStatus, new DateTime(DateTimeZone.UTC));
+            return String.format(sqlProgressNote, UUID.randomUUID().toString(), m2hid,
+                    reportContent.replaceAll("'", "\""), reportStatus, new DateTime(DateTimeZone.UTC));
         }
         return "";
     }
@@ -53,7 +60,7 @@ public class ProgressNoteEntryExtractor implements CcdaEntryExtractor {
         return (String) sectionXpathExp.evaluate(entry, XPathConstants.STRING);
     }
 
-    public void setGroupId(String groupId) {
+    public void setGroupId(final String groupId) {
         // TODO Auto-generated method stub
 
     }
