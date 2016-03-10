@@ -4,10 +4,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.UUID;
 
@@ -112,20 +108,20 @@ public class CcdaSectionExtractor {
         final String immGroupId = UUID.randomUUID().toString();
 
         immunizationExtractor.setGroupId(immGroupId);
-		
-		String sqlImmunGroup = "INSERT INTO records.\"ImmunizationGroup\" (id, m2hid, timestamp) "
-								+ "VALUES('%s' , '%s', '%s');";
-		
-		sbSql.append(sqlImmunGroup);
-		sbSql.append("\n");
-		
-		System.out.println("----------------------------");
-		
-		System.out.println("Creating Immunization Group");
-		
-		sqlImmunGroup = String.format(sqlImmunGroup, immGroupId, Utils.getM2hid(), Utils.getCurrentDate());
-		
-		final NodeList entryList = getSectionEntries(sectionNode, "entry");
+
+        String sqlImmunGroup = "INSERT INTO records.\"ImmunizationGroup\" (id, m2hid, timestamp) "
+                + "VALUES('%s' , '%s', '%s');";
+
+        sbSql.append(sqlImmunGroup);
+        sbSql.append("\n");
+
+        System.out.println("----------------------------");
+
+        System.out.println("Creating Immunization Group");
+
+        sqlImmunGroup = String.format(sqlImmunGroup, immGroupId, Utils.getM2hid(), Utils.getCurrentDate());
+
+        final NodeList entryList = getSectionEntries(sectionNode, "entry");
 
         for (int temp = 0; temp < entryList.getLength(); temp++) {
 
@@ -185,22 +181,22 @@ public class CcdaSectionExtractor {
         XPathExpression entryXpathExp = Utils.getXPathExpression(entryXpath);
         return (NodeList) entryXpathExp.evaluate(sectionNode, XPathConstants.NODESET);
     }
-    
+
     private void createSqlFile(final String strSql, final String dirPath) throws IOException {
-    	
-    	File file = new File(dirPath + "\\hugo_ccda.sql");
 
-		// if file doesnt exists, then create it
-		if (!file.exists()) {
-			file.createNewFile();
-		}
+        File file = new File(dirPath + "\\hugo_ccda.sql");
 
-		FileWriter fw = new FileWriter(file.getAbsoluteFile());
-		BufferedWriter bw = new BufferedWriter(fw);
-		bw.write(strSql);
-		bw.close();
+        // if file doesnt exists, then create it
+        if (!file.exists()) {
+            file.createNewFile();
+        }
 
-		System.out.println("Done");
+        FileWriter fw = new FileWriter(file.getAbsoluteFile());
+        BufferedWriter bw = new BufferedWriter(fw);
+        bw.write(strSql);
+        bw.close();
+
+        System.out.println("Done");
     }
 
 }
