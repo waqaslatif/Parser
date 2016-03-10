@@ -28,6 +28,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * 
+ * @author WaqasLatif
+ * @author Shamsi
+ * @author Ali
+ */
 public final class Utils {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
