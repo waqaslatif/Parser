@@ -6,12 +6,16 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.stella.utils.Utils;
 
 public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
+
+	private static final Logger LOG = LoggerFactory.getLogger(ImmunizationEntryExtractor.class);
 	
 	private String immunGroupId;
 	private String m2hid;
@@ -33,15 +37,15 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 		
 		final String nameRef = getNamRefFromNode(entry);
 		
-		System.out.println("----------------------------");		
-		System.out.println("Name Ref : " + nameRef);
+		LOG.info("----------------------------");		
+		LOG.info("Name Ref : " + nameRef);
 		
 		
 		String sqlImmunization = "INSERT INTO records.\"Immunization\" (m2hid, name, datespreviouslygiven, nextdue, description, reporturl, lastenquirydate, timestamp, immunGroupId) "
 					+ "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');";
 		
-		System.out.println("----------------------------");		
-		System.out.println("Reading Immunization Entry");
+		LOG.info("----------------------------");		
+		LOG.info("Reading Immunization Entry");
 		
 		//System.out.println(Utils.nodeToString(entry));
 		
@@ -60,8 +64,8 @@ public class ImmunizationEntryExtractor implements CcdaEntryExtractor {
 			
 			sqlImmunization = String.format(sqlImmunization, m2hid, name, datesPreviouslyGiven, nextDue, description, reportUrl, lastEnquiryDate, timeStamp, immunGroupId);	
 			
-			System.out.println("----------------------------");			
-			System.out.println("SQL Generated : " + sqlImmunization);
+			LOG.info("----------------------------");			
+			LOG.info("SQL Generated : " + sqlImmunization);
 
 		}
 		return sqlImmunization;

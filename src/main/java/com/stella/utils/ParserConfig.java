@@ -9,13 +9,22 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.stella.ccda.extractor.entry.ImmunizationEntryExtractor;
+
 /**
  * @author ali
  *
  */
 public class ParserConfig {
 	
+
 	public static final String DATASET_DIR_PATH = "datasetDir";
+	public static final String SQL_SCRIPT_FILE_PATH = "sqlScriptFilePath";
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ParserConfig.class);
 	
 	private static ParserConfig instance= null;
 	private Properties prop =  new Properties();
@@ -27,7 +36,7 @@ public class ParserConfig {
 	private ParserConfig(){
 		final String fileName = "conf/config.properties";
 		propMap = new HashMap<String, String>();
-		System.out.println("loading configuration :");
+		LOG.info("loading configuration :");
 		InputStream is;
 		try {
 			is = ClassLoader.getSystemResourceAsStream(fileName);
@@ -36,7 +45,7 @@ public class ParserConfig {
 				propMap.put((String) entry.getKey(), (String) entry.getValue());
 			}
 			
-			System.out.println("configurations Loaded ... ");
+			LOG.info("configurations Loaded ... ");
 			
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();

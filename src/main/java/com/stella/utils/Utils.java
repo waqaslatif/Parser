@@ -22,11 +22,15 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 public final class Utils {
-
+	
+	private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
+	
     private static final String DB_DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
 	private static final String ENABLE_OUTPUT = "yes";
 	private static final String DISABLE_OUTPUT = "no";
@@ -62,7 +66,7 @@ public final class Utils {
     	 trans.setOutputProperty(OutputKeys.INDENT, ENABLE_OUTPUT);
     	 trans.transform(new DOMSource(node), new StreamResult(sw));
     	} catch (TransformerException te) {
-    		System.out.println("nodeToString Transformer Exception");
+    		LOG.info("nodeToString Transformer Exception");
     	}
     	return sw.toString();
     }

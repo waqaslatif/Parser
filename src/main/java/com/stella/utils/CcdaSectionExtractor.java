@@ -14,6 +14,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -30,8 +32,10 @@ import com.stella.ccda.extractor.entry.ProgressNoteEntryExtractor;
  *
  */
 public class CcdaSectionExtractor {
-
-    private static final String IMMUNIZATION_SECION_ID = "2.16.840.1.113883.10.20.22.2.2.1";
+	
+	private static final Logger LOG = LoggerFactory.getLogger(CcdaSectionExtractor.class);
+   
+	private static final String IMMUNIZATION_SECION_ID = "2.16.840.1.113883.10.20.22.2.2.1";
     private static final String ACTIVE_PROBLEM_ID = "2.16.840.1.113883.10.20.22.4.3";
     private static final String PROGRESS_NOTE_SECION_ID = "1.3.6.1.4.1.19376.1.5.3.1.3.4";
     
@@ -53,8 +57,8 @@ public class CcdaSectionExtractor {
             	for(File ccdFile: ccdDatasetDir.listFiles()) { 
             		//extractProgressNoteSection(doc);
 	                if (FilenameUtils.getExtension(ccdFile.getName()).equals(XML_EXTENSION)) {
-	            		System.out.println("----------------------------");	
-		                System.out.println("Reading File : " + ccdFile.getName());
+	            		LOG.info("----------------------------");	
+		                LOG.info("Reading File : " + ccdFile.getName());
 		 
 		                dBuilder = dbFactory.newDocumentBuilder();
 		                document = dBuilder.parse(ccdFile);		
@@ -66,12 +70,12 @@ public class CcdaSectionExtractor {
 	                }
             	}
             	
-                System.out.println("----------------------------");
-                System.out.println("Generating SQL File");
+                LOG.info("----------------------------");
+                LOG.info("Generating SQL File");
                 createSqlFile(sbCcdaSQL.toString(), directoryPath);
             
             }
-            System.out.println(sbCcdaSQL.toString());
+            LOG.info(sbCcdaSQL.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -80,8 +84,8 @@ public class CcdaSectionExtractor {
 
     private String extractProgressNoteSection(final Document doc) throws XPathExpressionException, ParseException {
 
-        System.out.println("----------------------------");
-        System.out.println("Reading Progress Note Section");
+        LOG.info("----------------------------");
+        LOG.info("Reading Progress Note Section");
 
         final Node sectionNode = extractSectionByID(doc, "//section[templateId/@root='" + PROGRESS_NOTE_SECION_ID
                 + "']");
@@ -98,12 +102,12 @@ public class CcdaSectionExtractor {
 
         StringBuilder sbSql = new StringBuilder();
 
-        System.out.println("----------------------------");
-        System.out.println("Reading Immunization Section");
+        LOG.info("----------------------------");
+        LOG.info("Reading Immunization Section");
 
         final Node sectionNode = extractSectionByID(doc, "//section[templateId/@root='" + IMMUNIZATION_SECION_ID + "']");
 
-        // System.out.println(Utils.nodeToString(sectionNode));
+        // LOG.info(Utils.nodeToString(sectionNode));
 
         final String immGroupId = UUID.randomUUID().toString();
 
@@ -115,9 +119,9 @@ public class CcdaSectionExtractor {
         sbSql.append(sqlImmunGroup);
         sbSql.append("\n");
 
-        System.out.println("----------------------------");
+        LOG.info("----------------------------");
 
-        System.out.println("Creating Immunization Group");
+        LOG.info("Creating Immunization Group");
 
         sqlImmunGroup = String.format(sqlImmunGroup, immGroupId, Utils.getM2hid(), Utils.getCurrentDate());
 
@@ -127,8 +131,8 @@ public class CcdaSectionExtractor {
 
             Node entryNode = entryList.item(temp);
 
-            // System.out.println("----------------------------");
-            // System.out.println(Utils.nodeToString(entryNode));
+            // LOG.info("----------------------------");
+            // LOG.info(Utils.nodeToString(entryNode));
 
             sbSql.append(immunizationExtractor.extractData(entryNode));
             sbSql.append("\n");
@@ -160,7 +164,7 @@ public class CcdaSectionExtractor {
 		for (int temp = 0; temp < nList.getLength(); temp++) {
 			final Node nNode = nList.item(temp);
 			final String query = activeProblemExtractor.extractData(nNode);
-			querybuilder.append("\n");
+			querybuilder.append(LINE_BREAK);
 			querybuilder.append(query);
 		}
 		return querybuilder.toString();
@@ -196,7 +200,7 @@ public class CcdaSectionExtractor {
         bw.write(strSql);
         bw.close();
 
-        System.out.println("Done");
+        LOG.info("Done");
     }
 
 }
