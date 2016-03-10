@@ -1,4 +1,4 @@
-package com.stella.ccda.extractor.entry;
+package com.stella.ccd;
 
 import java.text.ParseException;
 

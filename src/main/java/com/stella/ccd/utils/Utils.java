@@ -1,4 +1,4 @@
-package com.stella.utils;
+package com.stella.ccd.utils;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -1,4 +1,4 @@
-package com.stella.ccda.extractor.entry;
+package com.stella.ccd;
 
 import java.text.ParseException;
 import java.util.UUID;
@@ -15,7 +15,7 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import com.stella.utils.Utils;
+import com.stella.ccd.utils.Utils;
 
 /**
  * 
@@ -23,8 +23,6 @@ import com.stella.utils.Utils;
  *
  */
 public class ProgressNoteSectionExtractor implements CCDElementExtractor {
-
-	private static final Logger LOG = LoggerFactory.getLogger(ProgressNoteSectionExtractor.class);
 	
 	private static final String PROGRESS_NOTE_SECION_ID = "1.3.6.1.4.1.19376.1.5.3.1.3.4";
 	
@@ -37,9 +35,6 @@ public class ProgressNoteSectionExtractor implements CCDElementExtractor {
     @Override
 	public String extract(Document document) throws XPathExpressionException,
 			ParseException {
-    	 LOG.info("----------------------------");
-         LOG.info("Reading Progress Note Section");
-
          final Node sectionNode = Utils.extractSectionByID(document, "//section[templateId/@root='" + PROGRESS_NOTE_SECION_ID
                  + "']");
          if (sectionNode != null) {

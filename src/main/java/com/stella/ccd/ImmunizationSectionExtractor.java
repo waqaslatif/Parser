@@ -1,4 +1,4 @@
-package com.stella.ccda.extractor.entry;
+package com.stella.ccd;
 
 import java.text.ParseException;
 import java.util.UUID;
@@ -13,7 +13,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.stella.utils.Utils;
+import com.stella.ccd.utils.Utils;
 
 public class ImmunizationSectionExtractor implements CCDElementExtractor {
 
@@ -25,7 +25,7 @@ public class ImmunizationSectionExtractor implements CCDElementExtractor {
 			+ "(id, m2hid, timestamp) VALUES('%s' , '%s', '%s');";
 	
 	private static final String INSERT_IMMUNIZATION_QUERY = "INSERT INTO records.\"Immunization\" (m2hid, name,"
-			+ " datespreviouslygiven, nextdue, description, reporturl, lastenquirydate, timestamp, immunGroupId)"
+			+ " datespreviouslygiven, nextdue, description, reporturl, lastenquirydate, timestamp, immunizationgroupid)"
 			+ " VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');";
 	
 	private String immunGroupId;
@@ -45,8 +45,8 @@ public class ImmunizationSectionExtractor implements CCDElementExtractor {
         final Node sectionNode = Utils.extractSectionByID(document, "//section[templateId"
         		+ "/@root='" + IMMUNIZATION_SECION_ID + "']");
         immunGroupId = UUID.randomUUID().toString();
-        
-        sbSql.append(INSERT_IMMUN_GROUP_QUERY);
+        final String immunGroupQuery = String.format(INSERT_IMMUN_GROUP_QUERY, immunGroupId, Utils.getM2hid(), Utils.getCurrentDate());
+        sbSql.append(immunGroupQuery);
         sbSql.append("\n");
 
         final NodeList entryList = Utils.getSectionEntries(sectionNode, "entry");

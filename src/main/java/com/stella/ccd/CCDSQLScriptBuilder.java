@@ -1,4 +1,4 @@
-package com.stella.utils;
+package com.stella.ccd;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,11 +13,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-
-import com.stella.ccda.extractor.entry.ActiveProblemActExtractor;
-import com.stella.ccda.extractor.entry.CCDElementExtractor;
-import com.stella.ccda.extractor.entry.ImmunizationSectionExtractor;
-import com.stella.ccda.extractor.entry.ProgressNoteSectionExtractor;
 
 /**
  * @author ali
@@ -48,23 +43,21 @@ public class CCDSQLScriptBuilder {
                     if (FilenameUtils.getExtension(ccdFile.getName()).equals(XML_EXTENSION)) {
                         LOG.info("----------------------------");
                         LOG.info("Reading File : " + ccdFile.getName());
-
+                        
                         dBuilder = dbFactory.newDocumentBuilder();
                         document = dBuilder.parse(ccdFile);
                         document.getDocumentElement().normalize();
-
+                        
                         sbCcdaSQL.append(immunizationExtractor.extract(document));
                         sbCcdaSQL.append(progressNoteEntryExtractor.extract(document));
                         sbCcdaSQL.append(activeProblemExtractor.extract(document));
                     }
                 }
 
-                LOG.info("----------------------------");
-                LOG.info("Generating SQL File");
+                LOG.info("Generating SQL File .....");
                 writeSQLFile(sbCcdaSQL.toString(), directoryPath);
-
             }
-            LOG.info(sbCcdaSQL.toString());
+            LOG.debug(sbCcdaSQL.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -85,12 +78,11 @@ public class CCDSQLScriptBuilder {
         if (!file.exists()) {
             file.createNewFile();
         }
-
         final FileWriter fw = new FileWriter(file.getAbsoluteFile());
         final BufferedWriter bw = new BufferedWriter(fw);
         bw.write(strSql);
         bw.close();
-        LOG.info("Write SQL script in '" + file.getAbsolutePath() + "'");
+        LOG.info("Generated SQL script in '" + file.getAbsolutePath() + "'");
     }
 
 }

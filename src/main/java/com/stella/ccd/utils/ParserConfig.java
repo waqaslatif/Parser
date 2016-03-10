@@ -1,4 +1,4 @@
-package com.stella.utils;
+package com.stella.ccd.utils;
 
 
 import java.io.FileNotFoundException;
@@ -20,7 +20,6 @@ public class ParserConfig {
 	
 
 	public static final String DATASET_DIR_PATH = "datasetDir";
-	public static final String SQL_SCRIPT_FILE_PATH = "sqlScriptFilePath";
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ParserConfig.class);
 	

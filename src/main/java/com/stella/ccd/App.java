@@ -1,4 +1,6 @@
-package com.stella.utils;
+package com.stella.ccd;
+
+import com.stella.ccd.utils.ParserConfig;
 
 /**
  * @author Shamsi

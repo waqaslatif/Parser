@@ -1,4 +1,4 @@
-package com.stella.ccda.extractor.entry;
+package com.stella.ccd;
 
 import java.text.ParseException;
 import java.util.UUID;
@@ -11,7 +11,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.stella.utils.Utils;
+import com.stella.ccd.utils.Utils;
 
 /**
  * @author ali
