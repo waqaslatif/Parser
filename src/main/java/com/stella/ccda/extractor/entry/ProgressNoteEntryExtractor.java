@@ -25,7 +25,7 @@ public class ProgressNoteEntryExtractor implements CcdaEntryExtractor {
 
     public String extractData(final Node progressNoteSection) throws DOMException, XPathExpressionException {
 
-        final String sqlProgressNote = "INSERT INTO records.Report(id,m2hid, reportcontent, reportstatus, timestamp)"
+        final String sqlProgressNote = "INSERT INTO records.\"Report\"(id,m2hid, reportcontent, reportstatus, timestamp)"
                 + "VALUES ('%s','%s', '%s', '%s', '%s');";
 
         final String m2hid = Utils.getM2hid();
