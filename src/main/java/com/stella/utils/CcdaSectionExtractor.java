@@ -2,6 +2,7 @@ package com.stella.utils;
 
 import java.io.File;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -26,15 +28,15 @@ import com.stella.ccda.extractor.entry.ProgressNoteEntryExtractor;
  */
 public class CcdaSectionExtractor {
 
-    private Document doc;
+    private static final String IMMUNIZATION_SECION_ID = "2.16.840.1.113883.10.20.22.2.2.1";
+    private static final String ACTIVE_PROBLEM_ID = "2.16.840.1.113883.10.20.22.4.3";
+    private static final String PROGRESS_NOTE_SECION_ID = "1.3.6.1.4.1.19376.1.5.3.1.3.4";
+    
+    private static final String XML_EXTENSION = "xml";
 
     private final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     private DocumentBuilder dBuilder;
-
-    private static final String IMMUNIZATION_SECION_ID = "2.16.840.1.113883.10.20.22.2.2.1";
-    private static final String ACTIVE_PROBLEM_ID = "2.16.840.1.113883.10.20.22.4.3";
-    //private static final String LINE_BREAK = "\n";
-    private static final String PROGRESS_NOTE_SECION_ID = "1.3.6.1.4.1.19376.1.5.3.1.3.4";
+    private Document document;
 
     private final CcdaEntryExtractor immunizationExtractor = new ImmunizationEntryExtractor();
     private final CcdaEntryExtractor progressNoteEntryExtractor = new ProgressNoteEntryExtractor();
@@ -47,24 +49,27 @@ public class CcdaSectionExtractor {
 
             File ccdDatasetDir = new File(filePath);
             if(ccdDatasetDir.isDirectory()) {
+            	final List<Document> ccdXmlDocuments = new ArrayList<Document>();
             	for(File ccdFile: ccdDatasetDir.listFiles()) { 
 	            	
             		System.out.println("----------------------------");	
 	                System.out.println("Reading File : " + ccdFile.getName());
-	
+	                
+	                
 	                dBuilder = dbFactory.newDocumentBuilder();
 	
-	                doc = dBuilder.parse(ccdFile);
+	                document = dBuilder.parse(ccdFile);
 	
-	                doc.getDocumentElement().normalize();
+	                document.getDocumentElement().normalize();
 	
-	                sbCcdaSQL.append(extractImmunizationSection(doc));
+	                sbCcdaSQL.append(extractImmunizationSection(document));
 	                
 	                //extractProgressNoteSection(doc);
-	                
-	                //ccdXmlDocuments.add(doc);
+	                if (FilenameUtils.getExtension(ccdFile.getName()).equals(XML_EXTENSION)) {
+	                	ccdXmlDocuments.add(document);
+	                }
             	}
-                //System.out.println(extractActiveProblem(ccdXmlDocuments));
+                System.out.println(extractActiveProblem(ccdXmlDocuments));
             	
             	//TBD:Write this all script into .txt or .sql file
             	
@@ -140,7 +145,7 @@ public class CcdaSectionExtractor {
      * @throws XPathExpressionException
      */
     public static String extractActiveProblem(final List<Document> ccdXMLDocumentsList) throws XPathExpressionException { 
-		final StringBuffer sqlScriptBuffer = new StringBuffer();
+		final StringBuilder sqlScriptBuffer = new StringBuilder();
 		for(Document ccdXMLDocument: ccdXMLDocumentsList) {
 			sqlScriptBuffer.append(extractActiveProblem(ccdXMLDocument));
 		}
@@ -158,7 +163,7 @@ public class CcdaSectionExtractor {
 		final XPathExpression problemExp = Utils.getXPathExpression("//act[templateId"
 				+ "/@root='" + ACTIVE_PROBLEM_ID + "']");
 		final NodeList nList = (NodeList) problemExp.evaluate(doc, XPathConstants.NODESET);
-		final StringBuffer queryBuffer = new StringBuffer();
+		final StringBuilder queryBuffer = new StringBuilder();
 		
 		for (int temp = 0; temp < nList.getLength(); temp++) {
 			final Node nNode = nList.item(temp);

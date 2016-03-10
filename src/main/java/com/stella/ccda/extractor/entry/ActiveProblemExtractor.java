@@ -1,7 +1,5 @@
 package com.stella.ccda.extractor.entry;
 
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.w3c.dom.Node;
@@ -45,20 +43,17 @@ public class ActiveProblemExtractor implements CcdaEntryExtractor {
 	}
 	
 	private String extractName(final Node entry) throws XPathExpressionException{
-		final XPathExpression timeStampXpathExp = Utils.getXPathExpression("entryRelationship/observation["
+		return Utils.getStringNode(entry, "entryRelationship/observation["
 				+ "templateId/@root='" + PROBLEM_ID_OBSERVATION + "']/value/@displayName");
-		return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
 	}
 	
 	private String extractNotedDate(final Node entry) throws XPathExpressionException{
-		final XPathExpression timeStampXpathExp = Utils.getXPathExpression("entryRelationship/observation["
+		return Utils.getStringNode(entry, "entryRelationship/observation["
 				+ "templateId/@root='" + PROBLEM_ID_OBSERVATION + "']/effectiveTime/low/@value");
-		return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
 	}
 	
 	private String extractTimestamp(final Node entry) throws XPathExpressionException{
-		final XPathExpression timeStampXpathExp = Utils.getXPathExpression("effectiveTime/low/@value");
-		return timeStampXpathExp.evaluate(entry,  XPathConstants.STRING).toString();
+		return Utils.getStringNode(entry, "effectiveTime/low/@value");
 	}
 
 	@Override
