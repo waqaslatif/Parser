@@ -46,6 +46,9 @@ public class ActiveProblemActExtractor implements CCDElementExtractor {
 		final NodeList nList = (NodeList) problemExp.evaluate(document, XPathConstants.NODESET);
 		final StringBuilder querybuilder = new StringBuilder();
 		final String documentDate = Utils.extractDocumentTimestamp(document);
+		if (nList.getLength() > 0) {
+            groupId = UUID.randomUUID().toString();
+		}
 		
 		for (int temp = 0; temp < nList.getLength(); temp++) {
 			final Node nNode = nList.item(temp);
@@ -55,7 +58,6 @@ public class ActiveProblemActExtractor implements CCDElementExtractor {
 		}
 		
 		if (nList.getLength() > 0) {
-			groupId = UUID.randomUUID().toString();
 	        querybuilder.insert(0, buildActiveProblemGroupSQL());
 		}
 		return querybuilder.toString();
